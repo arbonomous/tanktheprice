@@ -51,25 +51,41 @@
       <!-- Interactive Strait of Hormuz Radar -->
       <section class="xl:col-span-7 panel rounded-lg overflow-hidden flex flex-col">
         <div class="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 border-b border-slate-800 bg-[#0D1321]/80">
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2">
             <span class="text-xs font-semibold uppercase tracking-wider text-slate-100">Strait of Hormuz Live Tanker Radar</span>
-            <span id="vessel-count-badge" class="text-[11px] mono px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">68 / 68 VESSELS</span>
+            <span id="vessel-count-badge" class="text-[11px] mono px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">120 / 120 VESSELS</span>
+            <span id="live-ais-pill" class="inline-flex items-center gap-1.5 text-[11px] mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="live-ais-text">LIVE 20s AIS</span>
+            </span>
           </div>
           <div class="flex flex-wrap items-center gap-1.5">
             <div id="class-filters" class="inline-flex rounded bg-[#0B0F19] border border-slate-800 p-0.5 text-[11px] mono"></div>
             <button id="toggle-tss" class="px-2 py-0.5 rounded text-[11px] mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/35 cursor-pointer">TSS</button>
             <button id="toggle-dark" class="px-2 py-0.5 rounded text-[11px] mono bg-red-500/15 text-red-300 border border-red-500/35 cursor-pointer">DARK ZONE</button>
             <button id="toggle-anch" class="px-2 py-0.5 rounded text-[11px] mono bg-amber-500/15 text-amber-300 border border-amber-500/35 cursor-pointer">ANCHORAGES</button>
-            <button id="zoom-in" class="px-2 py-0.5 rounded text-[11px] mono bg-slate-800 text-slate-200 border border-slate-700 cursor-pointer">+</button>
-            <button id="zoom-out" class="px-2 py-0.5 rounded text-[11px] mono bg-slate-800 text-slate-200 border border-slate-700 cursor-pointer">-</button>
-            <button id="zoom-reset" class="px-2 py-0.5 rounded text-[11px] mono bg-slate-800 text-slate-300 border border-slate-700 cursor-pointer">RESET</button>
+            <button id="toggle-motion" class="px-2 py-0.5 rounded text-[11px] mono bg-sky-500/15 text-sky-300 border border-sky-500/35 cursor-pointer" title="Pause or resume real-time vessel motion">PAUSE</button>
+            <button id="toggle-speed" class="px-2 py-0.5 rounded text-[11px] mono bg-slate-800 text-slate-200 border border-slate-700 cursor-pointer" title="Toggle between 60x visible flow glide and 1x true nautical speed">60x FLOW</button>
           </div>
         </div>
 
-        <div class="relative bg-[#070D19] h-[440px] select-none overflow-hidden">
-          <svg id="hormuz-svg" class="w-full h-full block" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid meet"></svg>
-          <div class="absolute top-2.5 left-2.5 pointer-events-none rounded border border-slate-800 bg-[#0B0F19]/85 px-2 py-1 text-[11px] mono text-slate-400">
-            CLICK ANY TANKER TO INSPECT TELEMETRY · DASHED RED = AIS-DARK CORRIDOR
+        <div id="map-viewport" class="relative bg-[#070D19] h-[460px] select-none overflow-hidden touch-none">
+          <svg id="hormuz-svg" class="w-full h-full block cursor-grab" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
+            <g id="map-static-layer"></g>
+            <g id="map-vessels-layer"></g>
+          </svg>
+          <div class="absolute top-2.5 left-2.5 pointer-events-none rounded border border-slate-800 bg-[#0B0F19]/85 px-2.5 py-1 text-[11px] mono text-slate-400">
+            SCROLL TO ZOOM (UP TO 18x) · DRAG TO PAN · CLICK ANY TANKER TO INSPECT
+          </div>
+          <!-- Floating Zoom & Coordinate HUD -->
+          <div class="absolute top-2.5 right-2.5 flex flex-col items-center gap-1 rounded border border-slate-800 bg-[#0B0F19]/92 p-1 shadow-xl">
+            <button id="zoom-in" class="w-7 h-7 rounded bg-[#162033] hover:bg-[#1E2B44] text-slate-100 border border-slate-700 mono text-sm font-bold cursor-pointer" title="Zoom in">+</button>
+            <span id="zoom-readout" class="text-[10px] mono text-sky-300 py-0.5">1.0x</span>
+            <button id="zoom-out" class="w-7 h-7 rounded bg-[#162033] hover:bg-[#1E2B44] text-slate-100 border border-slate-700 mono text-sm font-bold cursor-pointer" title="Zoom out">−</button>
+            <button id="zoom-reset" class="w-7 h-6 mt-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 mono text-[9px] cursor-pointer" title="Reset view">RST</button>
+          </div>
+          <div id="map-coords" class="absolute bottom-2.5 right-2.5 pointer-events-none rounded border border-slate-800 bg-[#0B0F19]/88 px-2 py-1 text-[11px] mono text-slate-400">
+            26.000°N, 56.550°E
           </div>
           <div id="status-filters" class="absolute bottom-2.5 left-2.5 flex flex-wrap items-center gap-1 rounded border border-slate-800 bg-[#0B0F19]/90 px-2 py-1.5 text-[11px] mono"></div>
         </div>
@@ -133,6 +149,80 @@
       <div class="px-4 py-3 border-t border-slate-800 bg-[#0D1321]/70">
         <div class="text-[11px] mono uppercase tracking-wider text-slate-400 mb-2">Detected Chokepoint Divergence Zones (Tanker Slowdown Preceding Crude Swing)</div>
         <div id="divergence-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2"></div>
+      </div>
+    </section>
+
+    <!-- ROW 2.5: HOW TO TRADE THIS SIGNAL — EXECUTION PLAYBOOK & RISK CALCULATOR -->
+    <section id="trading-playbook-panel" class="panel rounded-lg overflow-hidden">
+      <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 border-b border-slate-800 bg-[#0D1321]/80">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-100">How to Trade This Signal — Execution Playbook &amp; Risk Desk</h2>
+          <span id="trade-regime-badge" class="text-[11px] mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/35">BULLISH CHOKE BIAS</span>
+        </div>
+        <span class="text-[11px] mono text-slate-500">EDUCATIONAL SIGNAL FRAMEWORK · NOT FINANCIAL ADVICE</span>
+      </div>
+
+      <div class="p-4 space-y-4">
+        <!-- Live Actionable Signal Synthesis -->
+        <div id="trade-live-banner" class="rounded-lg border border-slate-800 bg-[#0B0F19] p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 items-center"></div>
+
+        <!-- Two-column: Tradable Instruments Matrix + Interactive Position Sizing Calculator -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
+          <!-- Instruments & Tickers -->
+          <div class="xl:col-span-7 rounded-lg border border-slate-800 bg-[#0B0F19] overflow-hidden">
+            <div class="px-3.5 py-2 border-b border-slate-800 bg-[#0D1321] flex items-center justify-between">
+              <span class="text-[11px] mono uppercase tracking-wider text-slate-300">Tradable Vehicles Mapped to Hormuz Signals</span>
+              <span class="text-[11px] mono text-slate-500">ETFs · FUTURES · TANKER EQUITIES</span>
+            </div>
+            <div id="trade-vehicles-list" class="divide-y divide-slate-800/70"></div>
+          </div>
+
+          <!-- Interactive Position Sizing & Risk Calculator -->
+          <div class="xl:col-span-5 rounded-lg border border-slate-800 bg-[#0B0F19] p-4 flex flex-col justify-between gap-3">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] mono uppercase tracking-wider text-slate-300">Live Position Sizing &amp; Risk Calculator</span>
+                <span id="calc-horizon-pill" class="text-[10px] mono px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">24H–72H SWING</span>
+              </div>
+              <div class="grid grid-cols-3 gap-2 text-xs mono mb-3">
+                <div>
+                  <label for="calc-instrument" class="block text-[10px] text-slate-400 mb-1">INSTRUMENT</label>
+                  <select id="calc-instrument" class="w-full rounded bg-[#101726] border border-slate-700 px-2 py-1.5 text-slate-100 text-xs outline-none">
+                    <option value="BNO">BNO (Brent ETF)</option>
+                    <option value="USO">USO (WTI ETF)</option>
+                    <option value="BZ=F">BZ=F (Brent Fut)</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="calc-capital" class="block text-[10px] text-slate-400 mb-1">ACCOUNT ($)</label>
+                  <input id="calc-capital" type="number" min="500" step="500" value="25000" class="w-full rounded bg-[#101726] border border-slate-700 px-2 py-1.5 text-slate-100 text-xs outline-none" />
+                </div>
+                <div>
+                  <label for="calc-risk" class="block text-[10px] text-slate-400 mb-1">MAX RISK (%)</label>
+                  <input id="calc-risk" type="number" min="0.25" max="5" step="0.25" value="1.5" class="w-full rounded bg-[#101726] border border-slate-700 px-2 py-1.5 text-slate-100 text-xs outline-none" />
+                </div>
+              </div>
+              <div id="calc-output" class="grid grid-cols-2 gap-2"></div>
+            </div>
+            <div id="calc-rules-note" class="rounded border border-slate-800/90 bg-[#101726]/80 px-3 py-2 text-[11px] mono text-slate-400 leading-relaxed"></div>
+          </div>
+        </div>
+
+        <!-- 3-Regime Decision Matrix -->
+        <div class="rounded-lg border border-slate-800 bg-[#0B0F19] overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-[#0D1321] text-[11px] mono uppercase text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="py-2 px-3">Signal Regime</th>
+                <th class="py-2 px-3">Trigger Criteria</th>
+                <th class="py-2 px-3">Primary Trade Expression</th>
+                <th class="py-2 px-3">Confirmation Checklist</th>
+                <th class="py-2 px-3">Exit / Invalidation Rule</th>
+              </tr>
+            </thead>
+            <tbody id="trade-regime-table" class="divide-y divide-slate-800/70 text-xs"></tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -348,7 +438,10 @@ const state = {
   cls: "all", status: "all", showTss: true, showDark: true, showAnch: true,
   selectedMmsi: null, zoom: 1, centerLon: 56.55, centerLat: 26.0,
   sigTab: "lags", chartSym: "BZ=F", chartMetric: "count", logTab: "dark",
-  vlcc: 30, ais: 2.0, cong: 25, dur: 5
+  vlcc: 30, ais: 2.0, cong: 25, dur: 5,
+  motionPlaying: true, motionScale: 60, // 60x visible flow glide or 1x true nautical speed
+  lastLivePollTs: 0, livePollCount: 0,
+  calcInstrument: "BNO", calcCapital: 25000, calcRiskPct: 1.5
 };
 
 const fmtSigned = (v, d=2, suf="") => (v > 0 ? "+" : "") + v.toFixed(d) + suf;
@@ -395,9 +488,9 @@ function renderKpis() {
     <div class="px-4 py-2.5 bg-[#101829]/90">
       <div class="flex justify-between text-[11px] mono text-slate-300"><span>SUPPLY SHOCK &amp; 72H BIAS</span><span class="text-amber-400">GBR</span></div>
       <div class="mt-1 flex items-center justify-between">
-        <span class="text-lg mono font-bold text-amber-400">${fmtSigned(s.shock,1)}</span>
+        <span class="text-lg mono font-bold ${s.shock>=20?'text-amber-400':s.shock<=-15?'text-sky-400':'text-emerald-400'}">${fmtSigned(s.shock,1)}</span>
         <div class="flex items-center gap-1.5">
-          <span class="text-[11px] mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">${s.bias}</span>
+          <span class="text-[11px] mono px-1.5 py-0.5 rounded ${s.bias==='BULLISH'?'bg-emerald-500/15 text-emerald-300 border-emerald-500/30':s.bias==='BEARISH'?'bg-red-500/15 text-red-300 border-red-500/35':'bg-slate-800 text-slate-300 border-slate-700'} border">${s.bias}</span>
           <span class="text-xs mono text-slate-200">${fmtSigned(s.p72b,2,"%")}</span>
         </div>
       </div>
@@ -412,9 +505,89 @@ function project(lon, lat) {
   const y = (((state.centerLat + halfLat) - lat) / (2 * halfLat)) * 500;
   return [x, y];
 }
+
+function unproject(svgX, svgY) {
+  const halfLon = 2.0 / state.zoom;
+  const halfLat = 1.55 / state.zoom;
+  const lon = (state.centerLon - halfLon) + (svgX / 800) * (2 * halfLon);
+  const lat = (state.centerLat + halfLat) - (svgY / 500) * (2 * halfLat);
+  return [lon, lat];
+}
+
+function clientToSvg(clientX, clientY) {
+  const svgEl = document.getElementById("hormuz-svg");
+  const rect = svgEl.getBoundingClientRect();
+  const scale = Math.max(rect.width / 800, rect.height / 500);
+  const offsetX = (rect.width - 800 * scale) / 2;
+  const offsetY = (rect.height - 500 * scale) / 2;
+  return [(clientX - rect.left - offsetX) / scale, (clientY - rect.top - offsetY) / scale];
+}
+
 const polyPts = pts => pts.map(([lo, la]) => project(lo, la).map(v => v.toFixed(1)).join(",")).join(" ");
 
-function renderMap() {
+function clampMapCenter() {
+  state.centerLon = Math.max(54.2, Math.min(59.2, state.centerLon));
+  state.centerLat = Math.max(23.6, Math.min(28.3, state.centerLat));
+}
+
+function zoomAt(factor, svgX = 400, svgY = 250) {
+  const [anchorLon, anchorLat] = unproject(svgX, svgY);
+  const nextZoom = Math.max(0.75, Math.min(18.0, state.zoom * factor));
+  if (Math.abs(nextZoom - state.zoom) < 1e-4) return;
+  state.zoom = nextZoom;
+  // Keep cursor's geographic point pinned under cursor while zooming
+  const halfLon = 2.0 / state.zoom;
+  const halfLat = 1.55 / state.zoom;
+  state.centerLon = anchorLon - ((svgX / 800) - 0.5) * (2 * halfLon);
+  state.centerLat = anchorLat + ((svgY / 500) - 0.5) * (2 * halfLat);
+  clampMapCenter();
+  renderMap();
+}
+
+function renderMapStatic() {
+  document.getElementById("zoom-readout").textContent = `${state.zoom.toFixed(state.zoom >= 10 ? 0 : 1)}x`;
+  let svg = `<rect width="800" height="500" fill="#070D19"/>`;
+  // Adaptive graticule spacing based on zoom level
+  const step = state.zoom >= 6 ? 0.1 : state.zoom >= 2.5 ? 0.25 : 0.5;
+  for (let lon = 54.5; lon <= 59.0; lon += step) {
+    const [x] = project(lon, 26);
+    if (x >= -10 && x <= 810) {
+      svg += `<line x1="${x.toFixed(1)}" y1="0" x2="${x.toFixed(1)}" y2="500" stroke="#132238" stroke-width="0.6"/>`;
+    }
+  }
+  for (let lat = 24.0; lat <= 28.0; lat += step) {
+    const [,y] = project(56, lat);
+    if (y >= -10 && y <= 510) {
+      svg += `<line x1="0" y1="${y.toFixed(1)}" x2="800" y2="${y.toFixed(1)}" stroke="#132238" stroke-width="0.6"/>`;
+    }
+  }
+  svg += `<polygon points="${polyPts([[55,24],[58.5,24],[58.5,28],[55,28]])}" fill="none" stroke="#1E3A5F" stroke-width="1" stroke-dasharray="4 4"/>`;
+  if (state.showTss) {
+    svg += `<polygon points="${polyPts(TSS_OUT)}" fill="#10B981" fill-opacity="0.09" stroke="#10B981" stroke-opacity="0.45" stroke-width="1.2"/>`;
+    svg += `<polygon points="${polyPts(TSS_IN)}" fill="#38BDF8" fill-opacity="0.08" stroke="#38BDF8" stroke-opacity="0.45" stroke-width="1.2"/>`;
+  }
+  if (state.showAnch) {
+    ANCH.forEach(a => {
+      svg += `<polygon points="${polyPts(a)}" fill="#F59E0B" fill-opacity="0.12" stroke="#F59E0B" stroke-opacity="0.6" stroke-width="1" stroke-dasharray="2 2"/>`;
+    });
+  }
+  if (state.showDark) {
+    svg += `<polygon points="${polyPts([[55.8,25.5],[57.0,25.5],[57.0,27.0],[55.8,27.0]])}" fill="#EF4444" fill-opacity="0.07" stroke="#EF4444" stroke-opacity="0.6" stroke-width="1.4" stroke-dasharray="5 4"/>`;
+  }
+  LAND.forEach(poly => {
+    svg += `<polygon points="${polyPts(poly)}" fill="#131C2E" stroke="#314668" stroke-width="1.3"/>`;
+  });
+  PORTS.forEach(([label, lon, lat]) => {
+    const [x, y] = project(lon, lat);
+    if (x < -80 || x > 880 || y < -30 || y > 530) return;
+    svg += `<g pointer-events="none"><rect x="${(x-label.length*3.1-5).toFixed(1)}" y="${(y-8).toFixed(1)}" width="${(label.length*6.2+10).toFixed(1)}" height="15" rx="2" fill="#070D19" fill-opacity="0.72" stroke="#1E293B" stroke-width="0.7"/><text x="${x.toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="middle" fill="#94A3B8" font-size="8.5" font-family="ui-monospace,monospace" letter-spacing="1">${label}</text></g>`;
+  });
+  document.getElementById("map-static-layer").innerHTML = svg;
+}
+
+const vesselNodeMap = new Map();
+
+function renderVesselsLayer() {
   const filtered = VESSELS.filter(v => (state.cls === "all" || v.cls === state.cls) && (state.status === "all" || v.status === state.status));
   document.getElementById("vessel-count-badge").textContent = `${filtered.length} / ${VESSELS.length} VESSELS`;
 
@@ -422,7 +595,7 @@ function renderMap() {
   document.getElementById("class-filters").innerHTML = ["all","VLCC","Suezmax","Aframax"].map(c =>
     `<button data-cls="${c}" class="cls-btn px-2 py-0.5 rounded cursor-pointer ${state.cls===c?'bg-[#1C2A45] text-slate-100':'text-slate-400 hover:text-slate-200'}">${c==="all"?"ALL CLASS":c}</button>`
   ).join("");
-  document.querySelectorAll(".cls-btn").forEach(b => b.onclick = () => { state.cls = b.dataset.cls; renderMap(); });
+  document.querySelectorAll(".cls-btn").forEach(b => b.onclick = () => { state.cls = b.dataset.cls; renderVesselsLayer(); });
 
   // Status filter pills
   const counts = { outbound_laden:0, inbound_ballast:0, loitering:0, ais_gap:0 };
@@ -432,69 +605,227 @@ function renderMap() {
     Object.entries(STATUS_META).map(([k,m]) =>
       `<button data-st="${k}" class="st-btn inline-flex items-center gap-1.5 px-2 py-0.5 rounded cursor-pointer ${state.status===k?'bg-slate-700 text-white':'text-slate-300 hover:bg-slate-800'}"><span class="w-2 h-2 rounded-full ${m.dot}"></span>${m.label} <span class="text-slate-500">(${counts[k]})</span></button>`
     ).join("");
-  document.querySelectorAll(".st-btn").forEach(b => b.onclick = () => { state.status = (state.status===b.dataset.st && b.dataset.st!=="all") ? "all" : b.dataset.st; renderMap(); });
+  document.querySelectorAll(".st-btn").forEach(b => b.onclick = () => { state.status = (state.status===b.dataset.st && b.dataset.st!=="all") ? "all" : b.dataset.st; renderVesselsLayer(); });
 
-  let svg = `<rect width="800" height="500" fill="#070D19"/>`;
-  // Graticule lines
-  for (let lon = 55; lon <= 58.5; lon += 0.5) {
-    const [x] = project(lon, 26);
-    svg += `<line x1="${x.toFixed(1)}" y1="0" x2="${x.toFixed(1)}" y2="500" stroke="#132238" stroke-width="0.6"/>`;
-  }
-  for (let lat = 24.5; lat <= 27.5; lat += 0.5) {
-    const [,y] = project(56, lat);
-    svg += `<line x1="0" y1="${y.toFixed(1)}" x2="800" y2="${y.toFixed(1)}" stroke="#132238" stroke-width="0.6"/>`;
-  }
-  // Strait bbox
-  svg += `<polygon points="${polyPts([[55,24],[58.5,24],[58.5,28],[55,28]])}" fill="none" stroke="#1E3A5F" stroke-width="1" stroke-dasharray="4 4"/>`;
-  // TSS
-  if (state.showTss) {
-    svg += `<polygon points="${polyPts(TSS_OUT)}" fill="#10B981" fill-opacity="0.09" stroke="#10B981" stroke-opacity="0.45" stroke-width="1.2"/>`;
-    svg += `<polygon points="${polyPts(TSS_IN)}" fill="#38BDF8" fill-opacity="0.08" stroke="#38BDF8" stroke-opacity="0.45" stroke-width="1.2"/>`;
-  }
-  // Anchorages
-  if (state.showAnch) {
-    ANCH.forEach(a => {
-      svg += `<polygon points="${polyPts(a)}" fill="#F59E0B" fill-opacity="0.12" stroke="#F59E0B" stroke-opacity="0.6" stroke-width="1" stroke-dasharray="2 2"/>`;
-    });
-  }
-  // Dark corridor
-  if (state.showDark) {
-    svg += `<polygon points="${polyPts([[55.8,25.5],[57.0,25.5],[57.0,27.0],[55.8,27.0]])}" fill="#EF4444" fill-opacity="0.07" stroke="#EF4444" stroke-opacity="0.6" stroke-width="1.4" stroke-dasharray="5 4"/>`;
-  }
-  // Landmasses
-  LAND.forEach(poly => {
-    svg += `<polygon points="${polyPts(poly)}" fill="#131C2E" stroke="#314668" stroke-width="1.3"/>`;
-  });
-  // Ports
-  PORTS.forEach(([label, lon, lat]) => {
-    const [x, y] = project(lon, lat);
-    svg += `<g pointer-events="none"><rect x="${(x-label.length*3.1-5).toFixed(1)}" y="${(y-8).toFixed(1)}" width="${(label.length*6.2+10).toFixed(1)}" height="15" rx="2" fill="#070D19" fill-opacity="0.72" stroke="#1E293B" stroke-width="0.7"/><text x="${x.toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="middle" fill="#94A3B8" font-size="8.5" font-family="ui-monospace,monospace" letter-spacing="1">${label}</text></g>`;
-  });
-  // Vessel markers
+  const showLabels = state.zoom >= 2.4;
+  let svg = "";
   filtered.forEach(v => {
     const [x, y] = project(v.lon, v.lat);
     const meta = STATUS_META[v.status];
     const sel = state.selectedMmsi === v.mmsi;
-    const sc = v.cls === "VLCC" ? 0.82 : v.cls === "Suezmax" ? 0.68 : 0.58;
+    const zoomBoost = Math.min(1.35, 0.85 + Math.log2(Math.max(1, state.zoom)) * 0.14);
+    const sc = (v.cls === "VLCC" ? 0.85 : v.cls === "Suezmax" ? 0.72 : 0.62) * zoomBoost;
     const ring = sel
       ? `<circle cx="0" cy="0" r="14" fill="none" stroke="#F8FAFC" stroke-width="2"/>`
       : v.sanc
         ? `<circle cx="0" cy="0" r="11" fill="none" stroke="#EF4444" stroke-width="1.3" stroke-dasharray="3 2"/>`
         : "";
+    // Directional wake tail behind moving vessels
+    const wakeLen = v.spd >= 1.5 ? Math.min(24, 6 + v.spd * 1.15) : 0;
+    const wakeHtml = wakeLen > 0
+      ? `<line x1="0" y1="6" x2="0" y2="${(6 + wakeLen).toFixed(1)}" stroke="${meta.color}" stroke-opacity="0.48" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 2"/>`
+      : "";
+    const labelHtml = (showLabels || sel)
+      ? `<text x="11" y="3" fill="#E2E8F0" font-size="8.5" font-family="ui-monospace,monospace" paint-order="stroke" stroke="#070D19" stroke-width="2.5">${v.name.slice(0, 14)} · ${v.spd.toFixed(1)}kn</text>`
+      : "";
     svg += `<g class="v-node cursor-pointer" data-mmsi="${v.mmsi}" transform="translate(${x.toFixed(1)},${y.toFixed(1)})">
-      <title>${v.name} · ${v.cls} · ${v.spd} kn · Draft ${v.dft}m · ${v.dst}</title>
-      <circle cx="0" cy="0" r="12" fill="transparent"/>
+      <title>${v.name} · ${v.cls} · ${v.spd.toFixed(1)} kn · Hdg ${Math.round(v.hdg)}° · Draft ${v.dft}m · ${v.dst}</title>
+      <circle cx="0" cy="0" r="13" fill="transparent"/>
       ${ring}
-      <g transform="rotate(${v.hdg}) scale(${sel ? sc*1.25 : sc})">
+      <g transform="rotate(${v.hdg}) scale(${sel ? sc*1.2 : sc})">
+        ${wakeHtml}
         <path d="M0,-10 L7,8 L0,4.5 L-7,8 Z" fill="${meta.color}" stroke="${meta.stroke}" stroke-width="1.5" stroke-linejoin="round"/>
       </g>
+      ${labelHtml}
     </g>`;
   });
 
-  const el = document.getElementById("hormuz-svg");
-  el.innerHTML = svg;
-  el.querySelectorAll(".v-node").forEach(node => {
-    node.addEventListener("click", () => openVesselDrawer(node.dataset.mmsi));
+  const layer = document.getElementById("map-vessels-layer");
+  layer.innerHTML = svg;
+  vesselNodeMap.clear();
+  layer.querySelectorAll(".v-node").forEach(node => {
+    const m = node.dataset.mmsi;
+    vesselNodeMap.set(m, node);
+    node.addEventListener("click", ev => {
+      if (mapDragMoved) return;
+      ev.stopPropagation();
+      openVesselDrawer(m);
+    });
+  });
+}
+
+function renderMap() {
+  renderMapStatic();
+  renderVesselsLayer();
+}
+
+// Smooth 60fps real-time dead-reckoning vessel motion + smooth blending to fresh 20s live AIS fixes
+let lastFrameTs = performance.now();
+function animateVessels(now) {
+  const dtSec = Math.min(0.12, (now - lastFrameTs) / 1000);
+  lastFrameTs = now;
+
+  if (state.motionPlaying && VESSELS.length > 0) {
+    const mult = state.motionScale; // 60x visible flow glide or 1x true nautical speed
+    for (let i = 0; i < VESSELS.length; i++) {
+      const v = VESSELS[i];
+      // Smoothly interpolate toward fresh real AIS fix when a 20s poll arrives
+      if (v.targetLat !== undefined && v.targetLon !== undefined) {
+        v.lat += (v.targetLat - v.lat) * Math.min(1, dtSec * 2.5);
+        v.lon += (v.targetLon - v.lon) * Math.min(1, dtSec * 2.5);
+        if (Math.abs(v.targetLat - v.lat) < 0.00005 && Math.abs(v.targetLon - v.lon) < 0.00005) {
+          v.lat = v.targetLat; v.lon = v.targetLon;
+          v.targetLat = undefined; v.targetLon = undefined;
+        }
+      } else if (v.spd >= 0.4) {
+        // 1 knot = 1 NM/hr = (1/60) deg lat per 3600s
+        const rad = (v.hdg * Math.PI) / 180;
+        const degDist = (v.spd / 216000) * dtSec * mult;
+        const dLat = Math.cos(rad) * degDist;
+        const dLon = (Math.sin(rad) * degDist) / Math.max(0.2, Math.cos((v.lat * Math.PI) / 180));
+        v.lat += dLat;
+        v.lon += dLon;
+        // Softly keep cruising vessels inside the Strait monitoring box if gliding in 60x mode
+        if (v.lat < 24.05 || v.lat > 27.95 || v.lon < 55.05 || v.lon > 58.45) {
+          if (v.anchorLat !== undefined) {
+            v.lat = v.anchorLat;
+            v.lon = v.anchorLon;
+          }
+        }
+      }
+      const node = vesselNodeMap.get(v.mmsi);
+      if (node) {
+        const [x, y] = project(v.lon, v.lat);
+        node.setAttribute("transform", `translate(${x.toFixed(1)},${y.toFixed(1)})`);
+      }
+    }
+  }
+  requestAnimationFrame(animateVessels);
+}
+
+// Direct browser 20-second live AIS polling from hormuz.now (CORS enabled, CC BY 4.0)
+async function pollHormuzLive() {
+  const pillText = document.getElementById("live-ais-text");
+  try {
+    const resp = await fetch("https://hormuz.now/api/snapshot", { cache: "no-store" });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const payload = await resp.json();
+    const rows = payload.vessels || [];
+    const tankers = rows.filter(r => {
+      const st = Number(r.shiptype || 0);
+      const cat = String(r.category || r.type || "").toLowerCase();
+      return (st >= 80 && st <= 89) || cat.includes("tanker") || cat.includes("oil") || cat.includes("lng");
+    });
+    const inBox = (tankers.length >= 10 ? tankers : rows).filter(r => {
+      const la = Number(r.lat), lo = Number(r.lon);
+      return la >= 24.0 && la <= 28.0 && lo >= 55.0 && lo <= 58.5;
+    });
+
+    // Prioritize moving & larger tankers, cap 120
+    inBox.sort((a, b) => (Number(b.speed || 0) >= 3 ? 1 : 0) - (Number(a.speed || 0) >= 3 ? 1 : 0) || Number(b.dwt || 0) - Number(a.dwt || 0));
+    const top = inBox.slice(0, 120);
+    if (top.length < 5) return;
+
+    const existingMap = new Map(VESSELS.map(v => [v.mmsi, v]));
+    const nextVessels = top.map(r => {
+      const mmsi = String(r.mmsi || r.id || "000000000");
+      const lat = Number(r.lat), lon = Number(r.lon);
+      const spd = Number(r.speed || 0);
+      const rawHdg = Number(r.heading ?? r.course ?? 0);
+      const hdg = (rawHdg >= 0 && rawHdg < 360) ? rawHdg : (Number(r.course || 0) % 360);
+      const len = Number(r.length || 0);
+      const dwt = Number(r.dwt || (len >= 300 ? 305000 : len >= 245 ? 155000 : 110000));
+      const cls = (dwt >= 240000 || len >= 300) ? "VLCC" : (dwt >= 125000 || len >= 245) ? "Suezmax" : "Aframax";
+      const bbl = cls === "VLCC" ? 2.02 : cls === "Suezmax" ? 1.02 : 0.72;
+      const dft = Number(r.draft || r.draught || (hdg >= 90 && hdg <= 160 && spd >= 4 ? 15.2 : 10.2));
+      const inAnch = (lat >= 25.0 && lat <= 25.28 && lon >= 56.37 && lon <= 56.56) || (lat >= 27.04 && lat <= 27.16 && lon >= 56.14 && lon <= 56.36);
+      const status = (spd < 3.0 && !inAnch) ? "loitering" : (hdg >= 90 && hdg <= 160 && dft > 12.0) ? "outbound_laden" : "inbound_ballast";
+      const prev = existingMap.get(mmsi);
+      return {
+        mmsi,
+        imo: r.imo ? (String(r.imo).startsWith("IMO") ? String(r.imo) : "IMO" + r.imo) : "IMO" + mmsi.slice(0, 7),
+        name: String(r.name || "TANKER " + mmsi).trim().toUpperCase(),
+        cls, flag: String(r.flag || mmsi.slice(0, 2)).toUpperCase().slice(0, 3),
+        lat: prev ? prev.lat : lat,
+        lon: prev ? prev.lon : lon,
+        targetLat: prev ? lat : undefined,
+        targetLon: prev ? lon : undefined,
+        anchorLat: lat, anchorLon: lon,
+        spd, hdg, dft, dst: String(r.destination || "STRAIT OF HORMUZ").trim().toUpperCase() || "STRAIT OF HORMUZ",
+        status, sanc: false, dwt, bbl, gap: 0
+      };
+    });
+
+    VESSELS = nextVessels;
+    state.lastLivePollTs = Date.now();
+    state.livePollCount++;
+    renderVesselsLayer();
+    if (pillText) pillText.textContent = `LIVE 20s AIS · ${top.length} TANKERS`;
+  } catch {
+    if (pillText && state.livePollCount === 0) pillText.textContent = "LIVE SNAPSHOT · GLIDE ON";
+  }
+}
+
+// Mouse wheel zoom, click-and-drag pan, double-click zoom, cursor lat/lon readout
+let mapDragging = false;
+let mapDragMoved = false;
+let dragStartX = 0, dragStartY = 0, dragStartLon = 0, dragStartLat = 0;
+
+function bindMapInteractions() {
+  const svgEl = document.getElementById("hormuz-svg");
+  svgEl.addEventListener("wheel", e => {
+    e.preventDefault();
+    const [sx, sy] = clientToSvg(e.clientX, e.clientY);
+    const factor = e.deltaY < 0 ? 1.22 : 1 / 1.22;
+    zoomAt(factor, sx, sy);
+  }, { passive: false });
+
+  svgEl.addEventListener("dblclick", e => {
+    e.preventDefault();
+    const [sx, sy] = clientToSvg(e.clientX, e.clientY);
+    zoomAt(1.85, sx, sy);
+  });
+
+  svgEl.addEventListener("pointerdown", e => {
+    if (e.button !== 0) return;
+    mapDragging = true;
+    mapDragMoved = false;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    dragStartLon = state.centerLon;
+    dragStartLat = state.centerLat;
+    svgEl.classList.add("cursor-grabbing");
+    svgEl.classList.remove("cursor-grab");
+  });
+
+  window.addEventListener("pointermove", e => {
+    const rect = svgEl.getBoundingClientRect();
+    if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+      const [sx, sy] = clientToSvg(e.clientX, e.clientY);
+      const [lo, la] = unproject(sx, sy);
+      document.getElementById("map-coords").textContent = `${la.toFixed(3)}°N, ${lo.toFixed(3)}°E · ${state.zoom.toFixed(1)}x`;
+    }
+    if (!mapDragging) return;
+    const dxPx = e.clientX - dragStartX;
+    const dyPx = e.clientY - dragStartY;
+    if (Math.hypot(dxPx, dyPx) > 4) mapDragMoved = true;
+    const scale = Math.max(rect.width / 800, rect.height / 500);
+    const dxSvg = dxPx / scale;
+    const dySvg = dyPx / scale;
+    const halfLon = 2.0 / state.zoom;
+    const halfLat = 1.55 / state.zoom;
+    state.centerLon = dragStartLon - (dxSvg / 800) * (2 * halfLon);
+    state.centerLat = dragStartLat + (dySvg / 500) * (2 * halfLat);
+    clampMapCenter();
+    renderMap();
+  });
+
+  window.addEventListener("pointerup", () => {
+    if (!mapDragging) return;
+    mapDragging = false;
+    svgEl.classList.remove("cursor-grabbing");
+    svgEl.classList.add("cursor-grab");
+    setTimeout(() => { mapDragMoved = false; }, 30);
   });
 }
 
@@ -864,13 +1195,215 @@ function renderAnomalyLog() {
   });
 }
 
+function renderTradingPlaybook() {
+  const s = DATA.s;
+  const spread = s.bp - s.wp;
+  const isBull = s.shock >= 20 || s.bias === "BULLISH";
+  const isBear = s.shock <= -15 || s.bias === "BEARISH";
+  const regime = isBull ? "BULLISH CHOKE BIAS" : isBear ? "BEARISH FLOW RECOVERY" : "NEUTRAL / RANGE WATCH";
+  const badgeCls = isBull
+    ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/35"
+    : isBear
+      ? "bg-red-500/15 text-red-300 border-red-500/35"
+      : "bg-amber-500/15 text-amber-300 border-amber-500/35";
+  const badge = document.getElementById("trade-regime-badge");
+  badge.textContent = regime;
+  badge.className = "text-[11px] mono px-2 py-0.5 rounded border " + badgeCls;
+
+  const actionHeadline = isBull
+    ? "LONG BRENT (BNO / BZ=F) · LONG BRENT–WTI SPREAD · LONG VLCC TANKERS"
+    : isBear
+      ? "FADE CRUDE SPIKES · SHORT BRENT–WTI SPREAD · REDUCE TANKER BETA"
+      : "WAIT FOR BREAKOUT ABOVE +25 SHOCK OR FLOW DROP < -15% BEFORE DEPLOYING";
+
+  const rationale = isBull
+    ? `Live Supply Shock is ${fmtSigned(s.shock,1)} with 7d outbound flow ${fmtSigned(s.fd7,1,"%")} vs. 30d baseline and Congestion at ${s.cong.toFixed(0)}/100 (${s.loit} tankers queued). Historically, Strait bottlenecks impact seaborne Brent faster than inland WTI over a 24h–72h lag (model 72h target: ${fmtSigned(s.p72b,2,"%")}, OOS hit rate ${s.acc.toFixed(1)}%).`
+    : isBear
+      ? `Supply Shock (${fmtSigned(s.shock,1)}) signals easing chokepoint pressure and normalizing outbound tanker transits. Geopolitical war-risk premia in Brent typically compress faster than WTI as normal VLCC throughput resumes.`
+      : `Signals are mixed (Supply Shock ${fmtSigned(s.shock,1)}, Flow Delta ${fmtSigned(s.fd7,1,"%")}). Keep powder dry or express smaller mean-reversion trades until congestion spikes above 75/100 or outbound flow drops past -15%.`;
+
+  const invalidation = isBull
+    ? `Exit / abort if 7d Outbound Flow recovers above 0% vs. 30d baseline, Congestion drops below 45/100, or Brent closes > 2.5% below entry ($${(s.bp * 0.975).toFixed(2)}).`
+    : isBear
+      ? `Exit / abort if Supply Shock reverses above +20, AIS-dark corridor incidents spike, or Brent breaks > 2.5% above entry ($${(s.bp * 1.025).toFixed(2)}).`
+      : `Trigger long entry only on Supply Shock ≥ +25 with 7d Flow Delta ≤ -12%.`;
+
+  document.getElementById("trade-live-banner").innerHTML = `
+    <div class="lg:col-span-8 space-y-1.5">
+      <div class="text-[11px] mono uppercase tracking-wider text-slate-400">LIVE ACTIONABLE DESK STANCE</div>
+      <div class="text-sm font-bold mono ${isBull?'text-emerald-300':isBear?'text-red-300':'text-amber-300'}">${actionHeadline}</div>
+      <p class="text-xs text-slate-300 leading-relaxed">${rationale}</p>
+    </div>
+    <div class="lg:col-span-4 rounded border border-slate-800 bg-[#101726] p-3 mono space-y-1.5 text-xs">
+      <div class="flex justify-between"><span class="text-slate-400">BRENT–WTI SPREAD</span><span class="text-sky-300 font-semibold">$${spread.toFixed(2)} / bbl</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">PEAK LAG WINDOW</span><span class="text-slate-100">24h – 72h</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">OOS HIT RATE</span><span class="text-emerald-400 font-semibold">${s.acc.toFixed(1)}%</span></div>
+      <div class="pt-1 border-t border-slate-800 text-[11px] text-amber-300/90 leading-snug"><strong class="text-amber-400">INVALIDATION:</strong> ${invalidation}</div>
+    </div>
+  `;
+
+  const vehicles = [
+    {
+      name: "Direct Seaborne Crude",
+      tickers: "BNO (ETF) · BZ=F (Futures)",
+      bias: isBull ? "LONG" : isBear ? "SHORT / HEDGE" : "WATCH",
+      tone: isBull ? "emerald" : isBear ? "red" : "amber",
+      why: "Highest direct beta to Strait of Hormuz flows (~20% of global petroleum liquids). Use BNO for brokerage accounts or ICE Brent futures for capital efficiency."
+    },
+    {
+      name: "Brent–WTI Spread Pair Trade",
+      tickers: "Long BNO / Short USO · BZ–CL",
+      bias: isBull ? "WIDENER (LONG BZ / SHORT CL)" : isBear ? "NARROWER" : "NEUTRAL",
+      tone: isBull ? "sky" : isBear ? "amber" : "neutral",
+      why: `Isolates Middle East chokepoint risk from broad U.S./global macro oil demand. Current spread is $${spread.toFixed(2)}/bbl; Hormuz supply squeezes typically push Brent further above WTI.`
+    },
+    {
+      name: "VLCC & Product Tanker Equities",
+      tickers: "FRO · DHT · STNG · INSW",
+      bias: isBull ? "LONG FREIGHT CONVEXITY" : "NEUTRAL",
+      tone: isBull ? "emerald" : "neutral",
+      why: `When Congestion exceeds 70/100 (currently ${s.cong.toFixed(0)}/100) and tankers loiter off Fujairah/Oman, effective vessel supply shrinks and TD3C VLCC dayrates surge.`
+    },
+    {
+      name: "Tail-Risk Options Overlay",
+      tickers: "BNO / USO 30–45 DTE Call Spreads",
+      bias: s.shock >= 35 ? "ACTIVE TAIL HEDGE" : "STANDBY (SHOCK ≥ +40)",
+      tone: s.shock >= 35 ? "amber" : "neutral",
+      why: "If the Stress-Test Simulator indicates >10% Brent upside on a 30–50% VLCC drop, defined-risk OTM call spreads capture nonlinear crisis spikes without overnight gap stop-out risk."
+    }
+  ];
+
+  const badgeTone = t => t === "emerald" ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+    : t === "sky" ? "bg-sky-500/15 text-sky-300 border-sky-500/30"
+    : t === "amber" ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+    : t === "red" ? "bg-red-500/15 text-red-300 border-red-500/35"
+    : "bg-slate-800 text-slate-300 border-slate-700";
+
+  document.getElementById("trade-vehicles-list").innerHTML = vehicles.map(v => `
+    <div class="px-3.5 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-[#101726]/70">
+      <div class="space-y-0.5 max-w-xl">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-semibold text-slate-100">${v.name}</span>
+          <span class="text-[11px] mono text-sky-300">${v.tickers}</span>
+        </div>
+        <p class="text-[11px] text-slate-400 leading-relaxed">${v.why}</p>
+      </div>
+      <span class="shrink-0 self-start sm:self-center text-[10px] mono px-2 py-0.5 rounded border ${badgeTone(v.tone)}">${v.bias}</span>
+    </div>
+  `).join("");
+
+  const regimes = [
+    {
+      active: s.shock >= 25,
+      name: "Choke Breakout (Bullish)",
+      tone: "text-emerald-400",
+      trigger: "Supply Shock ≥ +25 AND 7d Flow Delta ≤ -10%",
+      expr: "Long BNO / BZ=F + Long Brent–WTI Spread; add FRO/DHT if Congestion > 75",
+      confirm: "Loitering queue rising off Fujairah/Musandam + amber divergence zone active",
+      exit: "Take 50% at 72h target, trail stop at -2.5% or when outbound flow returns to 30d avg"
+    },
+    {
+      active: s.shock > -15 && s.shock < 25,
+      name: "Balanced / Watchlist",
+      tone: "text-amber-300",
+      trigger: "Supply Shock between -15 and +25",
+      expr: "Stay flat or half-size relative-value spread only",
+      confirm: "Watch Radar for sudden dark-fleet corridor spike or TSS speed drop < 9 kn",
+      exit: "Avoid overtrading noise; wait for ±20σ flow or congestion confirmation"
+    },
+    {
+      active: s.shock <= -15,
+      name: "Flow Normalization (Bearish)",
+      tone: "text-red-400",
+      trigger: "Supply Shock ≤ -15 AND 7d Flow Delta ≥ +10%",
+      expr: "Fade geopolitical Brent spikes (Short BNO / Put Spreads / Short Brent–WTI)",
+      confirm: "Outbound VLCC pace accelerating, Fujairah queue clearing, speed > 12 kn",
+      exit: "Stop out on +2.5% Brent breakout or renewed AIS blackout surge"
+    }
+  ];
+
+  document.getElementById("trade-regime-table").innerHTML = regimes.map(r => `
+    <tr class="${r.active ? 'bg-sky-500/10' : 'hover:bg-[#101726]/60'}">
+      <td class="py-2.5 px-3 font-mono font-semibold ${r.tone} whitespace-nowrap">${r.active ? '▶ ' : ''}${r.name}</td>
+      <td class="py-2.5 px-3 font-mono text-slate-200">${r.trigger}</td>
+      <td class="py-2.5 px-3 text-slate-200">${r.expr}</td>
+      <td class="py-2.5 px-3 text-slate-400">${r.confirm}</td>
+      <td class="py-2.5 px-3 text-slate-400">${r.exit}</td>
+    </tr>
+  `).join("");
+
+  renderRiskCalc();
+}
+
+function renderRiskCalc() {
+  const s = DATA.s;
+  const inst = state.calcInstrument;
+  const capital = Math.max(100, Number(state.calcCapital) || 25000);
+  const riskPct = Math.max(0.1, Math.min(10, Number(state.calcRiskPct) || 1.5));
+  const isBear = s.shock <= -15 || s.bias === "BEARISH";
+  const dir = s.shock >= 15 || s.bias === "BULLISH" ? "LONG" : isBear ? "SHORT" : "WATCH / 0.5x LONG";
+
+  // Approximate ETF/futures reference price from live Brent/WTI quotes
+  const spotPrice = inst === "BZ=F" ? s.bp : inst === "BNO" ? Number((s.bp * 0.375).toFixed(2)) : Number((s.wp * 0.94).toFixed(2));
+  const stopPct = 2.5;
+  const targetPct = Math.max(2.0, Math.min(12.0, Math.abs(s.p72b) * 2.2 + (s.shock >= 25 ? 2.0 : 1.0)));
+  const maxRiskUsd = capital * (riskPct / 100);
+  const rawNotional = maxRiskUsd / (stopPct / 100);
+  const cappedNotional = Math.min(capital * (dir.includes("0.5x") ? 0.5 : 1.0), rawNotional);
+  const units = inst === "BZ=F" ? Math.max(1, Math.floor(cappedNotional / (spotPrice * 100))) : Math.max(1, Math.floor(cappedNotional / spotPrice));
+  const unitLbl = inst === "BZ=F" ? "micro-lots (100 bbl)" : "shares";
+  const stopPrice = dir.startsWith("SHORT") ? spotPrice * (1 + stopPct / 100) : spotPrice * (1 - stopPct / 100);
+  const targetPrice = dir.startsWith("SHORT") ? spotPrice * (1 - targetPct / 100) : spotPrice * (1 + targetPct / 100);
+  const rr = (targetPct / stopPct).toFixed(2);
+
+  document.getElementById("calc-output").innerHTML = `
+    <div class="rounded border border-slate-800 bg-[#101726] p-2.5 mono">
+      <div class="text-[10px] text-slate-400">STANCE &amp; MAX RISK</div>
+      <div class="mt-0.5 text-sm font-bold ${dir.includes('LONG')?'text-emerald-300':dir.includes('SHORT')?'text-red-300':'text-amber-300'}">${dir}</div>
+      <div class="text-[11px] text-slate-400">Risk Cap: $${maxRiskUsd.toFixed(0)} (${riskPct}%)</div>
+    </div>
+    <div class="rounded border border-slate-800 bg-[#101726] p-2.5 mono">
+      <div class="text-[10px] text-slate-400">POSITION SIZE</div>
+      <div class="mt-0.5 text-sm font-bold text-sky-300">$${cappedNotional.toLocaleString(undefined,{maximumFractionDigits:0})}</div>
+      <div class="text-[11px] text-slate-400">≈ ${units} ${unitLbl}</div>
+    </div>
+    <div class="rounded border border-slate-800 bg-[#101726] p-2.5 mono">
+      <div class="text-[10px] text-slate-400">TARGET (+${targetPct.toFixed(1)}%)</div>
+      <div class="mt-0.5 text-sm font-bold text-emerald-400">$${targetPrice.toFixed(2)}</div>
+      <div class="text-[11px] text-slate-400">Ref: $${spotPrice.toFixed(2)} · R:R ${rr}x</div>
+    </div>
+    <div class="rounded border border-slate-800 bg-[#101726] p-2.5 mono">
+      <div class="text-[10px] text-slate-400">STOP-LOSS (-${stopPct.toFixed(1)}%)</div>
+      <div class="mt-0.5 text-sm font-bold text-red-400">$${stopPrice.toFixed(2)}</div>
+      <div class="text-[11px] text-slate-400">Hard Risk Invalidation</div>
+    </div>
+  `;
+  document.getElementById("calc-rules-note").textContent =
+    `Sizing formula: Position = ($${maxRiskUsd.toFixed(0)} max risk) ÷ ${stopPct}% stop, capped at 100% account equity. Always verify real-time ETF/futures quotes and overnight gap risk with your broker before placing orders.`;
+}
+
 // Event bindings
-document.getElementById("toggle-tss").onclick = e => { state.showTss = !state.showTss; e.target.style.opacity = state.showTss ? "1" : "0.45"; renderMap(); };
-document.getElementById("toggle-dark").onclick = e => { state.showDark = !state.showDark; e.target.style.opacity = state.showDark ? "1" : "0.45"; renderMap(); };
-document.getElementById("toggle-anch").onclick = e => { state.showAnch = !state.showAnch; e.target.style.opacity = state.showAnch ? "1" : "0.45"; renderMap(); };
-document.getElementById("zoom-in").onclick = () => { state.zoom = Math.min(2.6, state.zoom * 1.25); renderMap(); };
-document.getElementById("zoom-out").onclick = () => { state.zoom = Math.max(0.85, state.zoom / 1.25); renderMap(); };
+document.getElementById("toggle-tss").onclick = e => { state.showTss = !state.showTss; e.target.style.opacity = state.showTss ? "1" : "0.45"; renderMapStatic(); };
+document.getElementById("toggle-dark").onclick = e => { state.showDark = !state.showDark; e.target.style.opacity = state.showDark ? "1" : "0.45"; renderMapStatic(); };
+document.getElementById("toggle-anch").onclick = e => { state.showAnch = !state.showAnch; e.target.style.opacity = state.showAnch ? "1" : "0.45"; renderMapStatic(); };
+document.getElementById("zoom-in").onclick = () => zoomAt(1.45, 400, 250);
+document.getElementById("zoom-out").onclick = () => zoomAt(1 / 1.45, 400, 250);
 document.getElementById("zoom-reset").onclick = () => { state.zoom = 1; state.centerLon = 56.55; state.centerLat = 26.0; renderMap(); };
+
+document.getElementById("toggle-motion").onclick = e => {
+  state.motionPlaying = !state.motionPlaying;
+  e.target.textContent = state.motionPlaying ? "PAUSE" : "PLAY";
+  e.target.className = "px-2 py-0.5 rounded text-[11px] mono cursor-pointer border " +
+    (state.motionPlaying ? "bg-sky-500/15 text-sky-300 border-sky-500/35" : "bg-amber-500/15 text-amber-300 border-amber-500/35");
+};
+document.getElementById("toggle-speed").onclick = e => {
+  state.motionScale = state.motionScale === 60 ? 1 : 60;
+  e.target.textContent = state.motionScale === 60 ? "60x FLOW" : "1x REAL";
+};
+
+document.getElementById("calc-instrument").onchange = e => { state.calcInstrument = e.target.value; renderRiskCalc(); };
+document.getElementById("calc-capital").oninput = e => { state.calcCapital = Number(e.target.value); renderRiskCalc(); };
+document.getElementById("calc-risk").oninput = e => { state.calcRiskPct = Number(e.target.value); renderRiskCalc(); };
 
 document.querySelectorAll(".sig-tab").forEach(btn => {
   btn.onclick = () => {
@@ -922,18 +1455,24 @@ function renderProvenance() {
 }
 
 function renderAll() {
-  VESSELS = mapVessels(DATA.v);
+  VESSELS = mapVessels(DATA.v).map(v => ({ ...v, anchorLat: v.lat, anchorLon: v.lon }));
+  document.getElementById("tab-dark-log").textContent = `AIS-DARK EVENTS (${(DATA.g || []).length})`;
+  document.getElementById("tab-loit-log").textContent = `LOITERING / QUEUE (${VESSELS.filter(v => v.status === "loitering").length})`;
   renderProvenance();
   renderKpis();
   renderMap();
   renderSignals();
   renderDualChart();
+  renderTradingPlaybook();
   renderStressTest();
   renderAnomalyLog();
 }
 
-// Instant initial render, then hydrate from auto-refreshed live_snapshot.json
+// Boot: bind pan/zoom, render immediately, hydrate live_snapshot.json, start 60fps glide + 20s live hormuz.now AIS poll
+bindMapInteractions();
 renderAll();
+requestAnimationFrame(animateVessels);
+
 fetch("./data/live_snapshot.json?t=" + Date.now(), { cache: "no-store" })
   .then(r => (r.ok ? r.json() : null))
   .then(fresh => {
@@ -942,7 +1481,12 @@ fetch("./data/live_snapshot.json?t=" + Date.now(), { cache: "no-store" })
       renderAll();
     }
   })
-  .catch(() => {});
+  .catch(() => {})
+  .finally(() => {
+    // Poll live hormuz.now AIS positions directly from browser every 20 seconds
+    pollHormuzLive();
+    setInterval(pollHormuzLive, 20000);
+  });
 </script>
 </body>
 </html>
