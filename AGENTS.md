@@ -105,17 +105,18 @@ HormuzFlow works out of the box with zero API keys (`FEED_MODE=auto` pulls live 
 
 To upgrade to high-resolution commercial AIS or Alpha Vantage oil data:
 
-1. Open `.env.local` (copied from `.env.example`):
+1. Open `.env.local` (copied from `.env.example`) — or add Repository Secrets in GitHub Settings → Secrets and variables → Actions for the automated 6-hour GitHub Pages refresh workflow (`.github/workflows/refresh-live-data.yml`):
    ```env
    FEED_MODE=auto
+   AISSTREAM_API_KEY=your_free_aisstream_io_key
    STRAITS_LIVE_API_KEY=your_straits_live_key
    DATALASTIC_API_KEY=your_datalastic_key
    MARINETRAFFIC_API_KEY=your_marinetraffic_key
    ALPHAVANTAGE_API_KEY=your_alphavantage_key
    ```
-2. Restart the FastAPI server or click **REFRESH** in the top-right KPI bar.
+2. Restart the FastAPI server or click **REFRESH** in the top-right KPI bar (or manually run the **Refresh Live HormuzFlow Data** GitHub Action).
 3. Click **FEEDS** in the header to verify each adapter flips from `STANDBY NO KEY` to `LIVE`:
-   - **Priority order (Maritime):** `Straits.live` → `Datalastic` → `MarineTraffic` → `Hormuz.now` / `IMF PortWatch` → `HormuzSimulator` fallback.
+   - **Priority order (Maritime):** `Straits.live` → `Datalastic` → `MarineTraffic` → `AISStream.io` (free live WebSocket AIS) → `Hormuz.now` / `IMF PortWatch` → `HormuzSimulator` fallback.
    - **Priority order (Oil Market):** `Alpha Vantage` (if key set, daily) → `yfinance` (`BZ=F` & `CL=F`, daily + hourly) → `MarketSimulator` fallback.
 
 ---
