@@ -32,7 +32,7 @@ jobs:
         env:
           PYTHONPATH: .
           FEED_MODE: auto
-          AISSTREAM_LISTEN_SECONDS: "60"
+          AISSTREAM_LISTEN_SECONDS: "15"
           AISSTREAM_API_KEY: ${{ secrets.AISSTREAM_API_KEY }}
           STRAITS_LIVE_API_KEY: ${{ secrets.STRAITS_LIVE_API_KEY }}
           DATALASTIC_API_KEY: ${{ secrets.DATALASTIC_API_KEY }}

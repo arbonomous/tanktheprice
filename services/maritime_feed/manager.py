@@ -178,6 +178,8 @@ class MaritimeFeedManager:
                     live_vessels = res.vessels
                 if res.daily_transits and len(res.daily_transits) >= 14 and not live_transits:
                     live_transits = res.daily_transits
+                if res.ais_gaps and not live_gaps:
+                    live_gaps = res.ais_gaps
                 active_sources.append(adapter.name)
                 self._record_health(
                     adapter.name,
