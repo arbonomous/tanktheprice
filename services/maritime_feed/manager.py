@@ -6,6 +6,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Literal
 
+from services.maritime_feed.aisstream import AisStreamAdapter
 from services.maritime_feed.base import AdapterHealth, MaritimeFeedPayload
 from services.maritime_feed.datalastic import DatalasticAdapter
 from services.maritime_feed.hormuz_now import HormuzNowAdapter
@@ -26,11 +27,13 @@ class MaritimeFeedManager:
         straits_live_api_key: str = "",
         datalastic_api_key: str = "",
         marinetraffic_api_key: str = "",
+        aisstream_api_key: str = "",
     ) -> None:
         self.feed_mode = feed_mode
         self.straits_live = StraitsLiveAdapter(api_key=straits_live_api_key)
         self.datalastic = DatalasticAdapter(api_key=datalastic_api_key)
         self.marinetraffic = MarineTrafficAdapter(api_key=marinetraffic_api_key)
+        self.aisstream = AisStreamAdapter(api_key=aisstream_api_key)
         self.hormuz_now = HormuzNowAdapter()
         self.imf_portwatch = ImfPortWatchAdapter()
         self.simulator = HormuzSimulator()
@@ -70,13 +73,13 @@ class MaritimeFeedManager:
                     "DISABLED" if adapter.is_configured() else "STANDBY_NO_KEY",
                     "Simulator mode forced via FEED_MODE=simulator",
                 )
-            for adapter in (self.hormuz_now, self.imf_portwatch):
+            for adapter in (self.aisstream, self.hormuz_now, self.imf_portwatch):
                 self._record_health(
                     adapter.name,
                     "free_live",
-                    True,
+                    adapter.is_configured(),
                     False,
-                    "DISABLED",
+                    "DISABLED" if adapter.is_configured() else "STANDBY_NO_KEY",
                     "Simulator mode forced via FEED_MODE=simulator",
                 )
             self._record_health(
@@ -131,6 +134,41 @@ class MaritimeFeedManager:
                     "DEGRADED",
                     f"Request failed ({type(exc).__name__}); falling back",
                 )
+
+        # 2. Try free keyed AISStream.io live WebSocket AIS if AISSTREAM_API_KEY is configured
+        if self.aisstream.is_configured():
+            try:
+                res = await self.aisstream.fetch(days=days)
+                if res.vessels and not live_vessels:
+                    live_vessels = res.vessels
+                active_sources.append(self.aisstream.name)
+                self._record_health(
+                    self.aisstream.name,
+                    "free_live",
+                    True,
+                    True,
+                    "LIVE",
+                    f"Live WebSocket AIS captured {len(res.vessels)} Strait of Hormuz tankers",
+                )
+            except Exception as exc:
+                logger.info("AISStream.io unavailable (%s); continuing fallback chain", exc)
+                self._record_health(
+                    self.aisstream.name,
+                    "free_live",
+                    True,
+                    False,
+                    "DEGRADED",
+                    f"WebSocket error ({type(exc).__name__}); falling back",
+                )
+        else:
+            self._record_health(
+                self.aisstream.name,
+                "free_live",
+                False,
+                False,
+                "STANDBY_NO_KEY",
+                "Add free AISSTREAM_API_KEY (aisstream.io) for live tanker positions",
+            )
 
         # 2. Try primary free live feeds (Hormuz.now & IMF PortWatch)
         for adapter in (self.hormuz_now, self.imf_portwatch):

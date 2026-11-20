@@ -41,6 +41,7 @@ class HormuzDataService:
             straits_live_api_key=settings.straits_live_api_key,
             datalastic_api_key=settings.datalastic_api_key,
             marinetraffic_api_key=settings.marinetraffic_api_key,
+            aisstream_api_key=settings.aisstream_api_key,
         )
         self.market_manager = MarketFeedManager(
             feed_mode=self.feed_mode,

@@ -10,6 +10,8 @@ services:
         value: auto
       - key: DATABASE_URL
         value: sqlite:///./data/hormuzflow.db
+      - key: AISSTREAM_API_KEY
+        sync: false
       - key: STRAITS_LIVE_API_KEY
         sync: false
       - key: DATALASTIC_API_KEY

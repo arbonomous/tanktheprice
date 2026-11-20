@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     straits_live_api_key: str = ""
     datalastic_api_key: str = ""
     marinetraffic_api_key: str = ""
+    aisstream_api_key: str = ""
     alphavantage_api_key: str = ""
 
     database_url: str = f"sqlite:///{ROOT_DIR / 'data' / 'hormuzflow.db'}"
