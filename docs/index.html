@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HormuzFlow — Strait of Hormuz Maritime Intelligence &amp; Oil Signal Terminal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #0B0F19; color: #F1F5F9; font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    .mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+    .panel { background: linear-gradient(180deg, rgba(22,32,51,0.72) 0%, rgba(16,23,38,0.96) 100%); border: 1px solid #1E293B; box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 8px 24px rgba(0,0,0,0.35); }
+    input[type=range] { -webkit-appearance: none; appearance: none; background: #1E293B; height: 6px; border-radius: 999px; outline: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 15px; height: 15px; border-radius: 50%; background: #0B0F19; border: 2px solid #38BDF8; cursor: pointer; }
+    input[type=range].r-red::-webkit-slider-thumb { border-color: #EF4444; }
+    input[type=range].r-amber::-webkit-slider-thumb { border-color: #F59E0B; }
+    input[type=range].r-emerald::-webkit-slider-thumb { border-color: #10B981; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0B0F19; }
+    ::-webkit-scrollbar-thumb { background: #243249; border-radius: 3px; }
+  </style>
+</head>
+<body class="m-0 p-0 antialiased">
+  <!-- TOP KPI TICKER BAR -->
+  <header class="sticky top-0 z-30 border-b border-slate-800 bg-[#0B0F19]/95 backdrop-blur">
+    <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2 border-b border-slate-800/70">
+      <div class="flex items-center gap-2.5">
+        <div class="h-7 w-7 rounded bg-sky-500/15 border border-sky-500/35 flex items-center justify-center text-sky-400 font-bold text-xs mono">HF</div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-sm font-bold tracking-[0.14em] text-slate-100 uppercase">HORMUZFLOW</h1>
+            <span class="text-[11px] mono px-1.5 py-0.5 rounded bg-slate-800/90 text-slate-400 border border-slate-700/80">24.0°–28.0°N / 55.0°–58.5°E</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-tight">Strait of Hormuz Maritime Intelligence &amp; Crude Oil Price-Swing Terminal</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-[11px] mono px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">YFINANCE LIVE · HORMUZ SIMULATOR</span>
+      </div>
+    </div>
+
+    <div id="kpi-row" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 divide-y md:divide-y-0 md:divide-x divide-slate-800/80"></div>
+  </header>
+
+  <main class="p-4 space-y-4 max-w-[1680px] mx-auto">
+    <!-- ROW 1: STRAIT OF HORMUZ RADAR + SIGNAL ENGINE -->
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
+      <!-- Interactive Strait of Hormuz Radar -->
+      <section class="xl:col-span-7 panel rounded-lg overflow-hidden flex flex-col">
+        <div class="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 border-b border-slate-800 bg-[#0D1321]/80">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-100">Strait of Hormuz Live Tanker Radar</span>
+            <span id="vessel-count-badge" class="text-[11px] mono px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">68 / 68 VESSELS</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5">
+            <div id="class-filters" class="inline-flex rounded bg-[#0B0F19] border border-slate-800 p-0.5 text-[11px] mono"></div>
+            <button id="toggle-tss" class="px-2 py-0.5 rounded text-[11px] mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/35 cursor-pointer">TSS</button>
+            <button id="toggle-dark" class="px-2 py-0.5 rounded text-[11px] mono bg-red-500/15 text-red-300 border border-red-500/35 cursor-pointer">DARK ZONE</button>
+            <button id="toggle-anch" class="px-2 py-0.5 rounded text-[11px] mono bg-amber-500/15 text-amber-300 border border-amber-500/35 cursor-pointer">ANCHORAGES</button>
+            <button id="zoom-in" class="px-2 py-0.5 rounded text-[11px] mono bg-slate-800 text-slate-200 border border-slate-700 cursor-pointer">+</button>
+            <button id="zoom-out" class="px-2 py-0.5 rounded text-[11px] mono bg-slate-800 text-slate-200 border border-slate-700 cursor-pointer">-</button>
+            <button id="zoom-reset" class="px-2 py-0.5 rounded text-[11px] mono bg-slate-800 text-slate-300 border border-slate-700 cursor-pointer">RESET</button>
+          </div>
+        </div>
+
+        <div class="relative bg-[#070D19] h-[440px] select-none overflow-hidden">
+          <svg id="hormuz-svg" class="w-full h-full block" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="absolute top-2.5 left-2.5 pointer-events-none rounded border border-slate-800 bg-[#0B0F19]/85 px-2 py-1 text-[11px] mono text-slate-400">
+            CLICK ANY TANKER TO INSPECT TELEMETRY · DASHED RED = AIS-DARK CORRIDOR
+          </div>
+          <div id="status-filters" class="absolute bottom-2.5 left-2.5 flex flex-wrap items-center gap-1 rounded border border-slate-800 bg-[#0B0F19]/90 px-2 py-1.5 text-[11px] mono"></div>
+        </div>
+      </section>
+
+      <!-- Quantitative Signal Engine -->
+      <section class="xl:col-span-5 panel rounded-lg overflow-hidden flex flex-col">
+        <div class="flex items-center justify-between px-4 py-2.5 border-b border-slate-800 bg-[#0D1321]/80">
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-100">Quantitative Signal Engine &amp; Backtester</h2>
+          <span class="text-[11px] mono px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">GBR + Z-SCORE</span>
+        </div>
+
+        <div id="signal-header" class="px-4 py-3 border-b border-slate-800 bg-[#0B0F19]/80 space-y-2.5"></div>
+
+        <div class="flex-1 p-3.5 flex flex-col gap-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <div id="sig-tabs" class="inline-flex rounded bg-[#0D1321] p-0.5 border border-slate-800 text-[11px] mono">
+              <button data-tab="lags" class="sig-tab px-2.5 py-1 rounded bg-[#1B2840] text-slate-100 cursor-pointer">LAG CORR (1D/3D/7D)</button>
+              <button data-tab="shock" class="sig-tab px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 cursor-pointer">SHOCK 30D</button>
+              <button data-tab="backtest" class="sig-tab px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 cursor-pointer">BACKTEST</button>
+            </div>
+            <span id="hit-rate-label" class="text-[11px] mono text-slate-400"></span>
+          </div>
+          <div id="signal-chart-box" class="flex-1 min-h-[215px]"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ROW 2: DUAL-AXIS OIL PRICE & OUTBOUND TANKER FLOW OVERLAY -->
+    <section class="panel rounded-lg overflow-hidden">
+      <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 border-b border-slate-800 bg-[#0D1321]/80">
+        <div class="flex items-center gap-2">
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-100">Dual-Axis Oil Price &amp; Outbound Tanker Flow Overlay</h2>
+          <span class="text-[11px] mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">YFINANCE LIVE</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="inline-flex rounded bg-[#0B0F19] border border-slate-800 p-0.5 text-[11px] mono">
+            <button id="sym-bz" class="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/35 cursor-pointer">BRENT (BZ=F)</button>
+            <button id="sym-cl" class="px-2.5 py-0.5 rounded text-slate-400 hover:text-slate-200 cursor-pointer">WTI (CL=F)</button>
+          </div>
+          <div class="inline-flex rounded bg-[#0B0F19] border border-slate-800 p-0.5 text-[11px] mono">
+            <button id="met-cnt" class="px-2 py-0.5 rounded bg-[#1C2A45] text-slate-100 cursor-pointer">TANKERS/D</button>
+            <button id="met-mbbl" class="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 cursor-pointer">MBBL/D</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-1.5 border-b border-slate-800/60 bg-[#0B0F19] text-[11px] mono text-slate-400">
+        <div class="flex flex-wrap items-center gap-4">
+          <span><span class="inline-block w-2 h-2 rounded-xs bg-emerald-400 mr-1"></span>Right Axis: Crude OHLC ($)</span>
+          <span><span class="inline-block w-2 h-2 rounded-xs bg-sky-400 mr-1"></span>Left Axis: Outbound Tankers + 7d MA</span>
+          <span class="text-amber-300"><span class="inline-block w-2 h-2 rounded-xs bg-amber-400 mr-1"></span>Amber Bars: Choke Divergence Zones</span>
+        </div>
+        <span id="chart-hover-readout" class="text-slate-200">Hover chart for daily OHLC &amp; flow telemetry</span>
+      </div>
+
+      <div class="bg-[#0B0F19] px-3 py-2">
+        <svg id="dual-chart-svg" class="w-full h-[290px] block" viewBox="0 0 1200 290" preserveAspectRatio="none"></svg>
+      </div>
+
+      <div class="px-4 py-3 border-t border-slate-800 bg-[#0D1321]/70">
+        <div class="text-[11px] mono uppercase tracking-wider text-slate-400 mb-2">Detected Chokepoint Divergence Zones (Tanker Slowdown Preceding Crude Swing)</div>
+        <div id="divergence-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2"></div>
+      </div>
+    </section>
+
+    <!-- ROW 3: INTERACTIVE SCENARIO STRESS-TEST SIMULATOR -->
+    <section class="panel rounded-lg overflow-hidden">
+      <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 border-b border-slate-800 bg-[#0D1321]/80">
+        <div class="flex items-center gap-2">
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-100">Scenario Stress-Test Simulator</h2>
+          <span id="stress-regime-badge" class="text-[11px] mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/35">ELEVATED SUPPLY SQUEEZE</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-1.5 text-[11px] mono">
+          <button data-preset="15" class="preset-btn px-2.5 py-1 rounded bg-[#162033] text-slate-200 border border-slate-700 hover:bg-[#1E2B44] cursor-pointer">-15% VLCC</button>
+          <button data-preset="30" class="preset-btn px-2.5 py-1 rounded bg-sky-500/20 text-sky-300 border border-sky-500/40 cursor-pointer">-30% VLCC</button>
+          <button data-preset="50" class="preset-btn px-2.5 py-1 rounded bg-red-500/15 text-red-300 border border-red-500/35 hover:bg-red-500/25 cursor-pointer">-50% CHOKE</button>
+          <button data-preset="0" class="preset-btn px-2.5 py-1 rounded bg-slate-800/80 text-slate-400 border border-slate-700 hover:text-slate-200 cursor-pointer">RESET</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 p-4">
+        <div class="lg:col-span-5 space-y-4">
+          <div>
+            <div class="flex justify-between text-xs mono mb-1.5"><label for="sl-vlcc" class="text-slate-300">Outbound VLCC Transit Drop</label><span id="lbl-vlcc" class="font-semibold text-red-400">-30%</span></div>
+            <input id="sl-vlcc" type="range" min="0" max="60" step="1" value="30" class="w-full r-red" />
+            <div class="flex justify-between text-[11px] mono text-slate-500 mt-1"><span>0%</span><span>15%</span><span>30%</span><span>50% Severe</span><span>60%</span></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mono mb-1.5"><label for="sl-ais" class="text-slate-300">AIS Spoofing / Dark-Fleet Spike</label><span id="lbl-ais" class="font-semibold text-amber-400">2.0x baseline</span></div>
+            <input id="sl-ais" type="range" min="1" max="5" step="0.1" value="2.0" class="w-full r-amber" />
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mono mb-1.5"><label for="sl-cong" class="text-slate-300">TSS Congestion / Loitering Surge</label><span id="lbl-cong" class="font-semibold text-sky-400">+25%</span></div>
+            <input id="sl-cong" type="range" min="0" max="100" step="5" value="25" class="w-full" />
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mono mb-1.5"><label for="sl-dur" class="text-slate-300">Choke Disruption Duration</label><span id="lbl-dur" class="font-semibold text-emerald-300">5 days</span></div>
+            <input id="sl-dur" type="range" min="1" max="14" step="1" value="5" class="w-full r-emerald" />
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 flex flex-col gap-3">
+          <div id="stress-cards" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+          <div class="rounded border border-slate-800 bg-[#0B0F19] p-3 flex-1">
+            <div class="flex items-center justify-between text-[11px] mono text-slate-400 mb-1.5">
+              <span>7-DAY FORWARD CRUDE TRAJECTORY (BASELINE VS. STRESSED $)</span>
+              <div class="flex gap-3"><span class="text-emerald-400">━ Stressed Brent</span><span class="text-sky-400">━ Stressed WTI</span><span class="text-slate-500">┄ Baseline</span></div>
+            </div>
+            <svg id="stress-svg" class="w-full h-[165px] block" viewBox="0 0 680 165" preserveAspectRatio="none"></svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROW 4: LIVE ANOMALY & DARK-FLEET LOG -->
+    <section class="panel rounded-lg overflow-hidden">
+      <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 border-b border-slate-800 bg-[#0D1321]/80">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-100">Live Chokepoint Anomaly &amp; Dark-Fleet Log (Click Row to Inspect)</h2>
+        <div class="inline-flex rounded bg-[#0B0F19] p-0.5 border border-slate-800 text-[11px] mono">
+          <button id="tab-dark-log" class="px-2.5 py-1 rounded bg-[#1B2840] text-slate-100 cursor-pointer">AIS-DARK EVENTS (15)</button>
+          <button id="tab-loit-log" class="px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 cursor-pointer">LOITERING / QUEUE (14)</button>
+        </div>
+      </div>
+      <div class="overflow-x-auto max-h-[280px] overflow-y-auto">
+        <table class="w-full text-left border-collapse">
+          <thead id="log-thead" class="sticky top-0 bg-[#0D1321] text-[11px] mono uppercase text-slate-400 border-b border-slate-800"></thead>
+          <tbody id="log-tbody" class="divide-y divide-slate-800/70 text-xs"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- SLIDE-OVER VESSEL INSPECTION DRAWER -->
+  <aside id="vessel-drawer" class="hidden fixed inset-y-0 right-0 z-50 w-full max-w-md border-l border-slate-700 bg-[#0D1321]/98 backdrop-blur-xl shadow-2xl flex flex-col"></aside>
+
+<script>
+const DATA = {
+  s: {bp:89.79,bc:-2.16,bcp:-2.35,wp:82.85,wc:-0.41,wcp:-0.49,out24:34,mbbl24:46.38,fd7:-1.66,r7:21.14,b30:21.5,b30m:29.74,fz:-0.119,dark:9,cdark:9,sanc:4,cong:60.3,loit:14,avgSpd:11.84,dSpike:97.4,shock:20.7,bias:"BULLISH",p72b:0.89,ciL:-7.2,ciH:8.98,acc:53.6,sharpe:-0.58,nbt:28},
+  lags: [[1,-0.297,-0.248,41.2,47.1],[3,-0.156,-0.195,53.3,66.7],[7,-0.012,-0.095,66.7,53.3]],
+  divs: [["2026-10-11","2026-10-13","Transit Slowdown -> Brent +4.9%",-20.7,4.91,38.8],["2026-10-15","2026-10-19","Transit Slowdown -> Brent +6.8%",-30.8,6.84,70.1],["2026-11-01","2026-11-05","Transit Slowdown -> Peak Shock +91",-40.7,0.0,91.1],["2026-11-18","2026-11-19","Active Choke Tightening",-12.2,0.0,32.6]],
+  bt: [["10-29",2.68,2.4,1],["10-30",-0.03,-10.94,1],["10-31",3.34,-11.93,0],["11-01",0.9,-19.57,0],["11-02",1.42,-6.18,0],["11-03",1.54,-5.1,0],["11-04",1.1,3.91,1],["11-05",-7.09,0.03,1],["11-06",-0.49,-5.85,1],["11-07",0.09,-6.95,0],["11-08",-0.33,-5.66,1],["11-09",0.2,3.51,1],["11-10",-2.71,4.75,0],["11-11",-0.18,3.32,0],["11-12",-3.22,0.02,1],["11-13",-1.37,-3.55,1],["11-14",0.26,-2.82,0],["11-15",-1.46,-4.06,1],["11-16",-0.01,-2.87,1],["11-17",1.82,-3.6,0]],
+  ds: [["2026-10-07",21.7,24,24.0,32.68],["2026-10-08",-0.1,24,24.0,33.98],["2026-10-09",-28.0,26,24.67,35.42],["2026-10-10",-19.2,26,25.0,37.02],["2026-10-11",25.6,23,24.6,30.66],["2026-10-12",31.7,21,24.0,28.92],["2026-10-13",38.8,19,23.29,27.48],["2026-10-14",-24.1,26,23.57,35.72],["2026-10-15",25.8,24,23.57,32.68],["2026-10-16",39.2,23,23.14,30.66],["2026-10-17",60.9,21,22.43,27.62],["2026-10-18",70.1,16,21.43,22.42],["2026-10-19",52.1,17,20.86,21.84],["2026-10-20",17.9,19,20.86,26.18],["2026-10-21",-16.1,25,20.71,35.0],["2026-10-22",-21.2,23,20.57,33.26],["2026-10-23",-18.5,25,20.86,34.7],["2026-10-24",-27.5,26,21.57,37.02],["2026-10-25",-10.9,23,22.57,31.96],["2026-10-26",3.5,21,23.14,30.22],["2026-10-27",7.7,20,23.29,28.2],["2026-10-28",-7.8,22,22.86,30.94],["2026-10-29",-13.6,24,23.0,32.68],["2026-10-30",-19.6,25,23.0,35.0],["2026-10-31",7.9,23,22.57,31.96],["2026-11-01",60.2,18,21.86,25.16],["2026-11-02",86.6,14,20.86,18.08],["2026-11-03",91.1,13,19.86,16.06],["2026-11-04",55.7,17,19.14,21.84],["2026-11-05",28.1,19,18.43,25.88],["2026-11-06",-5.1,23,18.14,31.96],["2026-11-07",-12.6,22,18.0,29.94],["2026-11-08",-20.1,23,18.71,31.96],["2026-11-09",-18.4,22,19.86,29.94],["2026-11-10",-20.7,23,21.29,33.26],["2026-11-11",-23.8,23,22.14,31.96],["2026-11-12",-22.9,23,22.71,31.96],["2026-11-13",-28.2,25,23.0,35.0],["2026-11-14",-21.2,24,23.29,33.98],["2026-11-15",-18.1,23,23.29,32.96],["2026-11-16",-3.0,21,23.14,28.92],["2026-11-17",13.4,20,22.71,26.9],["2026-11-18",26.0,20,22.29,26.9],["2026-11-19",32.6,19,21.71,24.58],["2026-11-20",21.7,21,21.14,28.92]],
+  bz: [["2026-10-05",103.01,103.55,99.76,100.32],["2026-10-06",100.26,101.3,97.08,100.58],["2026-10-07",100.97,102.59,99.62,100.2],["2026-10-08",101.13,105.91,100.75,104.28],["2026-10-09",103.9,105.07,102.39,104.72],["2026-10-12",104.64,107.3,102.35,106.65],["2026-10-13",106.09,106.73,104.36,105.69],["2026-10-14",106.27,107.13,105.23,106.06],["2026-10-15",105.95,106.39,103.38,105.92],["2026-10-16",105.9,110.0,104.92,109.86],["2026-10-19",110.25,110.69,106.82,109.55],["2026-10-20",109.13,111.97,105.95,108.79],["2026-10-21",109.27,111.31,107.69,108.82],["2026-10-22",109.92,113.49,109.73,113.17],["2026-10-23",112.76,117.41,112.72,116.72],["2026-10-26",115.8,117.42,114.0,115.81],["2026-10-27",115.2,116.93,113.36,113.88],["2026-10-28",114.21,116.5,113.28,115.32],["2026-10-29",114.19,116.11,112.92,114.88],["2026-10-30",115.83,118.0,115.28,117.64],["2026-11-02",111.84,112.38,103.29,104.77],["2026-11-03",104.51,107.21,100.8,103.6],["2026-11-04",104.37,104.87,93.4,94.62],["2026-11-05",94.59,99.25,93.44,98.29],["2026-11-06",99.24,100.92,96.65,98.32],["2026-11-09",98.06,98.42,90.63,92.57],["2026-11-10",92.39,92.82,89.15,91.49],["2026-11-11",91.77,94.73,91.48,92.76],["2026-11-12",92.51,96.25,91.19,95.82],["2026-11-13",95.89,97.12,95.07,95.84],["2026-11-16",95.84,96.76,91.75,92.44],["2026-11-17",92.04,94.14,91.25,93.14],["2026-11-18",93.25,93.52,90.35,91.95],["2026-11-19",90.02,90.08,89.33,89.79]],
+  cl: [["2026-10-05",91.77,91.88,88.74,89.43],["2026-10-06",89.27,90.05,86.86,89.44],["2026-10-07",89.96,90.98,87.96,88.28],["2026-10-08",89.0,93.2,88.77,91.49],["2026-10-09",91.29,92.17,90.01,91.85],["2026-10-12",91.83,94.36,89.61,93.74],["2026-10-13",93.21,95.11,91.7,94.14],["2026-10-14",94.75,96.06,93.97,95.09],["2026-10-15",95.19,98.32,93.58,97.97],["2026-10-16",97.55,101.9,96.85,101.41],["2026-10-19",101.75,104.18,99.24,103.66],["2026-10-20",103.43,110.48,101.04,101.79],["2026-10-21",98.19,100.4,96.26,97.15],["2026-10-22",97.78,100.17,97.72,99.47],["2026-10-23",99.1,103.92,98.84,103.27],["2026-10-26",102.61,103.13,100.33,101.76],["2026-10-27",101.29,102.82,99.44,99.9],["2026-10-28",100.17,103.55,99.75,102.78],["2026-10-29",101.96,103.0,99.79,102.0],["2026-10-30",102.8,104.99,102.43,104.12],["2026-11-02",102.39,102.75,95.15,96.46],["2026-11-03",96.3,98.82,93.59,96.09],["2026-11-04",96.81,97.15,87.13,88.12],["2026-11-05",88.05,91.32,86.65,90.52],["2026-11-06",91.2,92.53,89.07,90.83],["2026-11-09",90.83,91.42,85.02,86.85],["2026-11-10",86.43,86.93,83.88,86.04],["2026-11-11",86.43,88.74,85.81,86.53],["2026-11-12",86.5,89.15,85.13,88.74],["2026-11-13",88.79,89.64,87.8,88.56],["2026-11-16",88.65,89.49,85.02,85.72],["2026-11-17",85.16,87.38,84.68,86.01],["2026-11-18",85.75,85.95,81.97,83.26],["2026-11-19",83.1,83.19,82.37,82.85]],
+  v: [
+    ["241100017","IMO9300032","CASPIAN SHADOW","Aframax","SA",26.089,55.272,10.9,92,14.9,"ZHOUSHAN","outbound_laden",0,105579,0.72,0],
+    ["538101457","IMO9302453","COSGLORY LAKE","VLCC","AE",26.142,55.42,12.3,92,18.2,"RIZHAO","outbound_laden",0,312673,2.02,0],
+    ["241102808","IMO9304848","GENMAR ATLAS","Suezmax","AE",26.185,55.593,12.5,92,13.9,"NINGBO","outbound_laden",0,149506,1.02,0],
+    ["538104175","IMO9307285","JEBEL ALI SPIRIT","Aframax","HK",26.226,55.728,12.3,92,15.1,"ULSAN","outbound_laden",0,111923,0.72,0],
+    ["352105537","IMO9309704","DHT JAGUAR","VLCC","GR",26.266,55.946,11.3,92,16.9,"YEOSU","outbound_laden",0,300811,2.02,0],
+    ["563106871","IMO9312150","NS ANTARCTIC","Aframax","AE",26.315,56.017,10.9,92,15.4,"ROTTERDAM","outbound_laden",0,107580,0.72,0],
+    ["477108301","IMO9314492","SEAWAYS KILIMANJARO","VLCC","LR",26.299,56.168,13.9,92,20.9,"ROTTERDAM","outbound_laden",0,308381,2.02,0],
+    ["422109663","IMO9316922","NAVE BUENA SUERTE","VLCC","PA",26.312,56.248,11.9,96,18.9,"NINGBO","outbound_laden",0,306634,2.02,0],
+    ["352111024","IMO9319368","NORDIC BREEZE","Suezmax","AE",26.287,56.388,11.7,95,16.3,"NINGBO","outbound_laden",0,154836,1.02,0],
+    ["538112401","IMO9321777","OLYMPIC FLAME","Suezmax","PA",26.304,56.396,11.1,98,16.0,"NINGBO","outbound_laden",0,157664,1.02,0],
+    ["403113776","IMO9324187","SAUDI GLORY","VLCC","GR",26.256,56.499,10.7,103,18.3,"AIN SUKHNA","outbound_laden",0,306399,2.02,0],
+    ["422115165","IMO9326611","EASTERN HORIZON","VLCC","AE",26.163,56.629,11.0,145,17.9,"ROTTERDAM","outbound_laden",0,312709,2.02,0],
+    ["636116527","IMO9328994","MIRAGE CARRIER","Aframax","GR",26.07,56.682,11.7,145,15.4,"SIKKA","outbound_laden",0,116477,0.72,0],
+    ["538117914","IMO9331440","NEW VISION","VLCC","MH",25.976,56.725,12.6,149,19.9,"KIIRE","outbound_laden",0,308241,2.02,0],
+    ["538119245","IMO9333842","QATAR SPIRIT","VLCC","SA",25.828,56.797,13.2,142,17.2,"SIKKA","outbound_laden",0,312659,2.02,0],
+    ["477120599","IMO9336243","SEA EXPRESS","Aframax","MH",25.64,56.962,12.3,150,14.2,"SIKKA","outbound_laden",0,108486,0.72,0],
+    ["563121988","IMO9338591","TI EUROPE","VLCC","SG",25.58,57.055,13.5,152,21.2,"ROTTERDAM","outbound_laden",0,307880,2.02,0],
+    ["422123359","IMO9341057","KASHIMA MARU","VLCC","SA",25.425,57.144,12.1,139,18.3,"NINGBO","outbound_laden",0,307605,2.02,0],
+    ["422124743","IMO9343429","SONANGOL CABINDA","Suezmax","SA",25.26,57.262,13.1,137,14.8,"ULSAN","outbound_laden",0,154933,1.02,0],
+    ["636126130","IMO9345831","AL SALHEIA","VLCC","AE",25.13,57.398,12.6,142,18.3,"CHIBA","outbound_laden",0,308539,2.02,0],
+    ["477127466","IMO9348304","DARK PHOENIX","Aframax","LR",24.988,57.638,12.8,134,15.6,"ZHOUSHAN","outbound_laden",0,104127,0.72,0],
+    ["241128869","IMO9350696","FUJAIRAH VENTURE","Aframax","HK",24.873,57.78,13.3,127,13.8,"AIN SUKHNA","outbound_laden",0,117586,0.72,0],
+    ["422130180","IMO9353121","SUEZ PROSPECT","Suezmax","LR",24.768,57.843,14.1,125,14.9,"CHIBA","outbound_laden",0,153277,1.02,0],
+    ["563131587","IMO9355532","BANDAR EXPRESS","Aframax","PA",24.661,58.043,11.9,123,15.9,"SIKKA","outbound_laden",0,115332,0.72,0],
+    ["477132947","IMO9357928","STI RUBY","Aframax","GR",25.0,58.139,13.0,314,10.1,"AL BASRAH","inbound_ballast",0,102342,0.72,0],
+    ["477134352","IMO9360349","DUNE RUNNER","Aframax","MH",25.139,57.911,11.7,320,9.1,"JUBAIL","inbound_ballast",0,115516,0.72,0],
+    ["352135702","IMO9362784","KHOR FAKKAN STAR","Aframax","LR",25.247,57.823,13.1,315,8.9,"DAS ISLAND","inbound_ballast",0,115517,0.72,0],
+    ["563137058","IMO9365158","CRESCENT BAY","Aframax","BS",25.349,57.685,11.9,324,8.3,"MINA AL AHMADI","inbound_ballast",0,105238,0.72,0],
+    ["241138469","IMO9367562","HAFNIA LION","Aframax","SG",25.682,57.393,11.6,323,9.5,"RUWAIS","inbound_ballast",0,103542,0.72,0],
+    ["636139800","IMO9369969","CORAL LEADER","Aframax","SA",25.784,57.234,11.8,321,11.0,"AL BASRAH","inbound_ballast",0,117840,0.72,0],
+    ["477141185","IMO9372396","BAHRI YANBU","VLCC","CY",25.987,57.116,10.9,324,8.9,"RUWAIS","inbound_ballast",0,299117,2.02,0],
+    ["241142589","IMO9374773","MAERSK SARATOGA","Suezmax","CY",26.109,56.952,13.8,324,9.4,"MESAIEED","inbound_ballast",0,156816,1.02,0],
+    ["241143898","IMO9377250","SHARJAH WAVE","Aframax","GR",26.267,56.818,13.6,328,7.8,"JUBAIL","inbound_ballast",0,106172,0.72,0],
+    ["636145303","IMO9379619","EURONAV OCEANUS","VLCC","MH",26.388,56.711,13.6,297,8.5,"RUWAIS","inbound_ballast",0,297094,2.02,0],
+    ["563146684","IMO9382011","DELTA POSEIDON","Suezmax","PA",26.522,56.489,14.4,292,8.9,"AL BASRAH","inbound_ballast",0,157463,1.02,0],
+    ["477148046","IMO9384430","STARLIGHT VENTURE","VLCC","SG",26.524,56.46,13.5,305,7.9,"DAS ISLAND","inbound_ballast",0,301357,2.02,0],
+    ["403149420","IMO9386843","NAVION OCEANIA","Suezmax","HK",26.542,56.274,12.0,259,10.7,"AL BASRAH","inbound_ballast",0,153075,1.02,0],
+    ["403150774","IMO9389237","HORMUZ SOVEREIGN","VLCC","CY",26.531,56.138,11.6,260,8.4,"RUWAIS","inbound_ballast",0,301892,2.02,0],
+    ["477152187","IMO9391651","CRUDE TRADER","Suezmax","BS",26.538,55.961,14.6,256,9.8,"MESAIEED","inbound_ballast",0,149628,1.02,0],
+    ["636153525","IMO9394045","EAGLE TORONTO","Aframax","LR",26.451,55.845,11.7,249,10.6,"KHARG ISLAND","inbound_ballast",0,114722,0.72,0],
+    ["538154937","IMO9396525","DESH VISHAL","Suezmax","BS",26.402,55.618,14.6,244,8.5,"KHARG ISLAND","inbound_ballast",0,148581,1.02,0],
+    ["422156280","IMO9398941","MARAN HELEN","Suezmax","PA",26.379,55.517,12.4,252,8.7,"DAS ISLAND","inbound_ballast",0,148931,1.02,0],
+    ["563157625","IMO9401298","OMAN CREST","Aframax","PA",26.345,55.404,13.2,256,9.6,"FUJAIRAH","inbound_ballast",0,103181,0.72,0],
+    ["403159013","IMO9403705","ARABIAN TITAN","VLCC","SA",26.324,55.312,14.1,258,9.8,"JUBAIL","inbound_ballast",0,296951,2.02,0],
+    ["241160385","IMO9406114","SOHAR MARINER","Aframax","SA",26.282,55.191,11.7,248,8.6,"DAS ISLAND","inbound_ballast",0,115085,0.72,0],
+    ["477161723","IMO9408567","AL KHOR","Suezmax","HK",25.577,56.743,1.9,91,9.3,"FUJAIRAH ORDERS","loitering",0,149329,1.02,0],
+    ["477163101","IMO9410960","MINERVA SOPHIA","Suezmax","CY",26.933,56.296,1.4,217,18.1,"BANDAR ABBAS WAIT","loitering",0,159001,1.02,0],
+    ["422164488","IMO9413354","NORDIC HARRIER","VLCC","BS",26.228,56.406,1.5,171,9.3,"HORMUZ TRANSIT DELAY","loitering",0,295432,2.02,0],
+    ["636165892","IMO9415798","GULF PEARL","Aframax","PA",25.565,56.812,1.9,95,18.3,"FUJAIRAH ORDERS","loitering",0,113296,0.72,0],
+    ["477167228","IMO9418154","EMIRATES EAGLE","VLCC","SA",26.977,56.613,2.4,166,11.3,"BANDAR ABBAS WAIT","loitering",0,309366,2.02,0],
+    ["241168579","IMO9420572","SINOPEAK CRUDE","VLCC","CY",26.335,56.405,2.6,184,14.6,"HORMUZ TRANSIT DELAY","loitering",0,304928,2.02,0],
+    ["241169991","IMO9422974","AL DHAFRA","Aframax","SA",25.515,56.929,2.6,287,11.2,"FUJAIRAH ORDERS","loitering",0,109951,0.72,0],
+    ["241171357","IMO9425399","AEGEAN FREEDOM","Suezmax","SG",26.782,56.321,2.3,302,19.8,"BANDAR ABBAS WAIT","loitering",0,157641,1.02,0],
+    ["403172729","IMO9427872","SCF SAKHALIN","Suezmax","SA",26.199,56.543,1.3,307,11.4,"HORMUZ TRANSIT DELAY","loitering",0,148965,1.02,0],
+    ["538174090","IMO9430267","SCORPIO VANGUARD","Aframax","SA",25.606,57.095,0.7,291,14.5,"FUJAIRAH ORDERS","loitering",0,102769,0.72,0],
+    ["538175433","IMO9432704","PERSIAN STAR","VLCC","BS",26.905,56.356,0.7,130,10.1,"BANDAR ABBAS WAIT","loitering",0,300114,2.02,0],
+    ["636176807","IMO9435087","BENGAL SPIRIT","Suezmax","LR",26.396,56.29,1.3,296,15.3,"HORMUZ TRANSIT DELAY","loitering",0,148326,1.02,0],
+    ["636178192","IMO9437523","STENA SUPREME","Suezmax","MH",25.359,56.755,0.5,303,8.8,"FUJAIRAH ORDERS","loitering",0,152093,1.02,0],
+    ["477179549","IMO9439900","PACIFIC VOYAGER","VLCC","SA",26.958,56.59,1.9,198,15.7,"BANDAR ABBAS WAIT","loitering",0,307305,2.02,0],
+    ["422180943","IMO9442297","FRONT ALTAIR","VLCC","PW",26.111,55.941,11.5,106,15.9,"ZHOUSHAN","ais_gap",0,300660,2.02,18.2],
+    ["403182344","IMO9444754","ARABIAN DAWN","Aframax","CM",26.536,56.698,9.7,132,16.1,"SINGAPORE EOPL","ais_gap",1,113290,0.72,11.9],
+    ["241183728","IMO9447103","MARAN CENTAURUS","VLCC","PW",26.657,56.479,9.1,138,15.0,"SINGAPORE EOPL","ais_gap",0,316662,2.02,7.2],
+    ["538185071","IMO9449523","MUSANDAM TRADER","Aframax","PW",26.088,56.385,6.7,119,16.8,"FOR ORDERS","ais_gap",1,114778,0.72,19.7],
+    ["241186422","IMO9451971","CAPE BASTIA","Suezmax","PW",26.757,56.692,10.5,138,18.2,"FOR ORDERS","ais_gap",0,154693,1.02,8.6],
+    ["538187797","IMO9454335","GULF CROWN","VLCC","PW",26.34,56.532,6.6,152,14.3,"FOR ORDERS","ais_gap",1,301092,2.02,4.7],
+    ["477189125","IMO9456725","OLYMPIC LUCK","VLCC","PA",26.827,56.401,6.4,149,19.9,"UNKNOWN","ais_gap",0,298842,2.02,5.8],
+    ["403190580","IMO9459163","UMM AL QUWAIN","Suezmax","GA",26.643,55.962,9.5,130,15.1,"UNKNOWN","ais_gap",1,150339,1.02,18.4],
+    ["563191881","IMO9461620","SEAVIGOUR","Suezmax","GA",26.732,56.712,7.0,122,17.8,"ZHOUSHAN","ais_gap",0,151807,1.02,13.6]
+  ],
+  g: [
+    ["538187797","GULF CROWN","VLCC","CRITICAL",4.7,26.34,56.532,1,1,"2026-11-19 21:55"],
+    ["477189125","OLYMPIC LUCK","VLCC","HIGH",5.8,26.827,56.401,0,1,"2026-11-19 20:49"],
+    ["241183728","MARAN CENTAURUS","VLCC","HIGH",7.2,26.657,56.479,0,1,"2026-11-19 19:25"],
+    ["241186422","CAPE BASTIA","Suezmax","HIGH",8.6,26.757,56.692,0,1,"2026-11-19 18:01"],
+    ["403182344","ARABIAN DAWN","Aframax","CRITICAL",11.9,26.536,56.698,1,1,"2026-11-19 14:43"],
+    ["563191881","SEAVIGOUR","Suezmax","HIGH",13.6,26.732,56.712,0,1,"2026-11-19 13:01"],
+    ["422180943","FRONT ALTAIR","VLCC","CRITICAL",18.2,26.111,55.941,0,1,"2026-11-19 08:25"],
+    ["403190580","UMM AL QUWAIN","Suezmax","CRITICAL",18.4,26.643,55.962,1,1,"2026-11-19 08:13"],
+    ["538185071","MUSANDAM TRADER","Aframax","CRITICAL",19.7,26.088,56.385,1,1,"2026-11-19 06:55"],
+    ["422602876","OLYMPIC FLAME","Suezmax","MEDIUM",5.4,26.849,56.266,0,0,"2026-11-18 16:37"],
+    ["422605033","MIRAGE CARRIER","Aframax","HIGH",12.0,26.308,56.594,0,0,"2026-11-17 13:37"],
+    ["422600000","NS ANTARCTIC","Aframax","HIGH",17.4,25.913,56.776,1,0,"2026-11-17 01:37"],
+    ["422607190","SEA EXPRESS","Aframax","HIGH",13.3,25.667,56.256,0,0,"2026-11-16 14:37"],
+    ["422605752","NEW VISION","VLCC","MEDIUM",4.1,26.785,56.502,0,0,"2026-11-15 00:37"],
+    ["422601438","NAVE BUENA SUERTE","VLCC","HIGH",13.9,25.81,56.335,0,0,"2026-11-11 23:37"]
+  ]
+};
+
+const VESSELS = DATA.v.map(r => ({
+  mmsi:r[0], imo:r[1], name:r[2], cls:r[3], flag:r[4], lat:r[5], lon:r[6],
+  spd:r[7], hdg:r[8], dft:r[9], dst:r[10], status:r[11], sanc:!!r[12],
+  dwt:r[13], bbl:r[14], gap:r[15]
+}));
+
+const STATUS_META = {
+  outbound_laden: { label: "Outbound Laden", color: "#10B981", stroke: "#064E3B", dot: "bg-emerald-400" },
+  inbound_ballast: { label: "Inbound Ballast", color: "#38BDF8", stroke: "#0C4A6E", dot: "bg-sky-400" },
+  loitering: { label: "Loitering / Queue", color: "#F59E0B", stroke: "#78350F", dot: "bg-amber-400" },
+  ais_gap: { label: "AIS Gap / Dark", color: "#EF4444", stroke: "#7F1D1D", dot: "bg-red-500" }
+};
+
+const LAND = [
+  [[54.2,28.6],[59.3,28.6],[59.3,25.4],[58.85,25.55],[58.45,25.63],[58.05,25.66],[57.78,25.64],[57.52,25.88],[57.28,26.25],[57.08,26.64],[57.05,26.98],[56.82,27.14],[56.42,27.19],[56.12,27.14],[55.72,26.92],[55.34,26.66],[54.92,26.55],[54.52,26.74],[54.2,26.95]],
+  [[55.28,26.58],[55.56,26.67],[55.94,26.86],[56.27,26.97],[56.24,26.86],[55.96,26.68],[55.62,26.56],[55.31,26.52]],
+  [[56.42,27.09],[56.49,27.10],[56.51,27.04],[56.44,27.03]],
+  [[56.31,26.88],[56.39,26.89],[56.40,26.82],[56.32,26.82]],
+  [[54.2,23.4],[54.2,24.55],[54.78,24.82],[55.12,25.08],[55.38,25.35],[55.65,25.60],[55.94,25.86],[56.12,26.15],[56.25,26.36],[56.42,26.38],[56.46,26.18],[56.38,25.88],[56.35,25.56],[56.36,25.25],[56.38,24.98],[56.52,24.66],[56.78,24.36],[57.28,24.02],[57.95,23.72],[58.85,23.56],[59.3,23.4]]
+];
+const TSS_OUT = [[55.45,25.95],[56.05,26.25],[56.48,26.35],[56.78,26.05],[57.25,25.40],[57.00,25.25],[56.58,25.88],[56.35,26.15],[55.98,26.08],[55.45,25.78]];
+const TSS_IN = [[55.35,26.28],[56.10,26.62],[56.68,26.62],[57.15,26.20],[57.62,25.65],[57.38,25.48],[56.92,26.02],[56.55,26.42],[56.08,26.42],[55.35,26.10]];
+const ANCH = [
+  [[56.37,25.0],[56.56,25.0],[56.56,25.28],[56.37,25.28]],
+  [[56.14,27.04],[56.36,27.04],[56.36,27.16],[56.14,27.16]]
+];
+const PORTS = [
+  ["BANDAR ABBAS",56.28,27.22],["FUJAIRAH",56.25,25.12],["KHOR FAKKAN",56.25,25.36],
+  ["MUSANDAM",56.25,26.15],["QESHM",55.82,26.82],["JASK",57.77,25.66],
+  ["DUBAI / JEBEL ALI",55.12,25.12],["GULF OF OMAN",57.85,24.75],["PERSIAN GULF",55.28,26.18]
+];
+
+const state = {
+  cls: "all", status: "all", showTss: true, showDark: true, showAnch: true,
+  selectedMmsi: null, zoom: 1, centerLon: 56.55, centerLat: 26.0,
+  sigTab: "lags", chartSym: "BZ=F", chartMetric: "count", logTab: "dark",
+  vlcc: 30, ais: 2.0, cong: 25, dur: 5
+};
+
+const fmtSigned = (v, d=2, suf="") => (v > 0 ? "+" : "") + v.toFixed(d) + suf;
+
+function renderKpis() {
+  const s = DATA.s;
+  const spread = (s.bp - s.wp).toFixed(2);
+  document.getElementById("kpi-row").innerHTML = `
+    <div class="px-4 py-2.5">
+      <div class="flex justify-between text-[11px] mono text-slate-400"><span>BRENT CRUDE · BZ=F</span><span class="text-slate-500">yfinance</span></div>
+      <div class="mt-1 flex items-baseline justify-between">
+        <span class="text-lg mono font-semibold text-slate-100">$${s.bp.toFixed(2)}</span>
+        <span class="text-xs mono ${s.bc>=0?'text-emerald-400':'text-red-400'}">${fmtSigned(s.bcp,2,"%")}</span>
+      </div>
+    </div>
+    <div class="px-4 py-2.5">
+      <div class="flex justify-between text-[11px] mono text-slate-400"><span>WTI CRUDE · CL=F</span><span class="text-slate-500">SPREAD $${spread}</span></div>
+      <div class="mt-1 flex items-baseline justify-between">
+        <span class="text-lg mono font-semibold text-slate-100">$${s.wp.toFixed(2)}</span>
+        <span class="text-xs mono ${s.wc>=0?'text-emerald-400':'text-red-400'}">${fmtSigned(s.wcp,2,"%")}</span>
+      </div>
+    </div>
+    <div class="px-4 py-2.5">
+      <div class="flex justify-between text-[11px] mono text-slate-400"><span>24H OUTBOUND LADEN</span><span class="text-emerald-400">090°–160° &gt;12m</span></div>
+      <div class="mt-1 flex items-baseline justify-between">
+        <span class="text-lg mono font-semibold text-emerald-300">${s.out24} <span class="text-xs font-normal text-slate-400">tankers</span></span>
+        <span class="text-xs mono text-slate-300">${s.mbbl24.toFixed(1)} Mbbl</span>
+      </div>
+    </div>
+    <div class="px-4 py-2.5">
+      <div class="flex justify-between text-[11px] mono text-slate-400"><span>7D FLOW DELTA VS 30D</span><span class="text-slate-500">CONG ${s.cong.toFixed(0)}/100</span></div>
+      <div class="mt-1 flex items-baseline justify-between">
+        <span class="text-lg mono font-semibold text-slate-100">${fmtSigned(s.fd7,1,"%")}</span>
+        <span class="text-xs mono text-slate-400">${s.r7.toFixed(1)} / ${s.b30.toFixed(1)}</span>
+      </div>
+    </div>
+    <div class="px-4 py-2.5">
+      <div class="flex justify-between text-[11px] mono text-slate-400"><span>ACTIVE AIS-DARK VESSELS</span><span class="text-red-400">CORRIDOR</span></div>
+      <div class="mt-1 flex items-baseline justify-between">
+        <span class="text-lg mono font-semibold text-red-400">${s.dark} <span class="text-xs font-normal text-slate-400">(${s.cdark} in corr)</span></span>
+        <span class="text-[11px] mono px-1.5 py-0.5 rounded bg-red-500/15 text-red-300 border border-red-500/35">${s.sanc} SANC</span>
+      </div>
+    </div>
+    <div class="px-4 py-2.5 bg-[#101829]/90">
+      <div class="flex justify-between text-[11px] mono text-slate-300"><span>SUPPLY SHOCK &amp; 72H BIAS</span><span class="text-amber-400">GBR</span></div>
+      <div class="mt-1 flex items-center justify-between">
+        <span class="text-lg mono font-bold text-amber-400">${fmtSigned(s.shock,1)}</span>
+        <div class="flex items-center gap-1.5">
+          <span class="text-[11px] mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">${s.bias}</span>
+          <span class="text-xs mono text-slate-200">${fmtSigned(s.p72b,2,"%")}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function project(lon, lat) {
+  const halfLon = 2.0 / state.zoom;
+  const halfLat = 1.55 / state.zoom;
+  const x = ((lon - (state.centerLon - halfLon)) / (2 * halfLon)) * 800;
+  const y = (((state.centerLat + halfLat) - lat) / (2 * halfLat)) * 500;
+  return [x, y];
+}
+const polyPts = pts => pts.map(([lo, la]) => project(lo, la).map(v => v.toFixed(1)).join(",")).join(" ");
+
+function renderMap() {
+  const filtered = VESSELS.filter(v => (state.cls === "all" || v.cls === state.cls) && (state.status === "all" || v.status === state.status));
+  document.getElementById("vessel-count-badge").textContent = `${filtered.length} / ${VESSELS.length} VESSELS`;
+
+  // Class filters
+  document.getElementById("class-filters").innerHTML = ["all","VLCC","Suezmax","Aframax"].map(c =>
+    `<button data-cls="${c}" class="cls-btn px-2 py-0.5 rounded cursor-pointer ${state.cls===c?'bg-[#1C2A45] text-slate-100':'text-slate-400 hover:text-slate-200'}">${c==="all"?"ALL CLASS":c}</button>`
+  ).join("");
+  document.querySelectorAll(".cls-btn").forEach(b => b.onclick = () => { state.cls = b.dataset.cls; renderMap(); });
+
+  // Status filter pills
+  const counts = { outbound_laden:0, inbound_ballast:0, loitering:0, ais_gap:0 };
+  VESSELS.forEach(v => counts[v.status]++);
+  document.getElementById("status-filters").innerHTML =
+    `<button data-st="all" class="st-btn px-2 py-0.5 rounded cursor-pointer ${state.status==='all'?'bg-slate-700 text-white':'text-slate-400 hover:text-slate-200'}">ALL (${VESSELS.length})</button>` +
+    Object.entries(STATUS_META).map(([k,m]) =>
+      `<button data-st="${k}" class="st-btn inline-flex items-center gap-1.5 px-2 py-0.5 rounded cursor-pointer ${state.status===k?'bg-slate-700 text-white':'text-slate-300 hover:bg-slate-800'}"><span class="w-2 h-2 rounded-full ${m.dot}"></span>${m.label} <span class="text-slate-500">(${counts[k]})</span></button>`
+    ).join("");
+  document.querySelectorAll(".st-btn").forEach(b => b.onclick = () => { state.status = (state.status===b.dataset.st && b.dataset.st!=="all") ? "all" : b.dataset.st; renderMap(); });
+
+  let svg = `<rect width="800" height="500" fill="#070D19"/>`;
+  // Graticule lines
+  for (let lon = 55; lon <= 58.5; lon += 0.5) {
+    const [x] = project(lon, 26);
+    svg += `<line x1="${x.toFixed(1)}" y1="0" x2="${x.toFixed(1)}" y2="500" stroke="#132238" stroke-width="0.6"/>`;
+  }
+  for (let lat = 24.5; lat <= 27.5; lat += 0.5) {
+    const [,y] = project(56, lat);
+    svg += `<line x1="0" y1="${y.toFixed(1)}" x2="800" y2="${y.toFixed(1)}" stroke="#132238" stroke-width="0.6"/>`;
+  }
+  // Strait bbox
+  svg += `<polygon points="${polyPts([[55,24],[58.5,24],[58.5,28],[55,28]])}" fill="none" stroke="#1E3A5F" stroke-width="1" stroke-dasharray="4 4"/>`;
+  // TSS
+  if (state.showTss) {
+    svg += `<polygon points="${polyPts(TSS_OUT)}" fill="#10B981" fill-opacity="0.09" stroke="#10B981" stroke-opacity="0.45" stroke-width="1.2"/>`;
+    svg += `<polygon points="${polyPts(TSS_IN)}" fill="#38BDF8" fill-opacity="0.08" stroke="#38BDF8" stroke-opacity="0.45" stroke-width="1.2"/>`;
+  }
+  // Anchorages
+  if (state.showAnch) {
+    ANCH.forEach(a => {
+      svg += `<polygon points="${polyPts(a)}" fill="#F59E0B" fill-opacity="0.12" stroke="#F59E0B" stroke-opacity="0.6" stroke-width="1" stroke-dasharray="2 2"/>`;
+    });
+  }
+  // Dark corridor
+  if (state.showDark) {
+    svg += `<polygon points="${polyPts([[55.8,25.5],[57.0,25.5],[57.0,27.0],[55.8,27.0]])}" fill="#EF4444" fill-opacity="0.07" stroke="#EF4444" stroke-opacity="0.6" stroke-width="1.4" stroke-dasharray="5 4"/>`;
+  }
+  // Landmasses
+  LAND.forEach(poly => {
+    svg += `<polygon points="${polyPts(poly)}" fill="#131C2E" stroke="#314668" stroke-width="1.3"/>`;
+  });
+  // Ports
+  PORTS.forEach(([label, lon, lat]) => {
+    const [x, y] = project(lon, lat);
+    svg += `<g pointer-events="none"><rect x="${(x-label.length*3.1-5).toFixed(1)}" y="${(y-8).toFixed(1)}" width="${(label.length*6.2+10).toFixed(1)}" height="15" rx="2" fill="#070D19" fill-opacity="0.72" stroke="#1E293B" stroke-width="0.7"/><text x="${x.toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="middle" fill="#94A3B8" font-size="8.5" font-family="ui-monospace,monospace" letter-spacing="1">${label}</text></g>`;
+  });
+  // Vessel markers
+  filtered.forEach(v => {
+    const [x, y] = project(v.lon, v.lat);
+    const meta = STATUS_META[v.status];
+    const sel = state.selectedMmsi === v.mmsi;
+    const sc = v.cls === "VLCC" ? 0.82 : v.cls === "Suezmax" ? 0.68 : 0.58;
+    const ring = sel
+      ? `<circle cx="0" cy="0" r="14" fill="none" stroke="#F8FAFC" stroke-width="2"/>`
+      : v.sanc
+        ? `<circle cx="0" cy="0" r="11" fill="none" stroke="#EF4444" stroke-width="1.3" stroke-dasharray="3 2"/>`
+        : "";
+    svg += `<g class="v-node cursor-pointer" data-mmsi="${v.mmsi}" transform="translate(${x.toFixed(1)},${y.toFixed(1)})">
+      <title>${v.name} · ${v.cls} · ${v.spd} kn · Draft ${v.dft}m · ${v.dst}</title>
+      <circle cx="0" cy="0" r="12" fill="transparent"/>
+      ${ring}
+      <g transform="rotate(${v.hdg}) scale(${sel ? sc*1.25 : sc})">
+        <path d="M0,-10 L7,8 L0,4.5 L-7,8 Z" fill="${meta.color}" stroke="${meta.stroke}" stroke-width="1.5" stroke-linejoin="round"/>
+      </g>
+    </g>`;
+  });
+
+  const el = document.getElementById("hormuz-svg");
+  el.innerHTML = svg;
+  el.querySelectorAll(".v-node").forEach(node => {
+    node.addEventListener("click", () => openVesselDrawer(node.dataset.mmsi));
+  });
+}
+
+function openVesselDrawer(mmsi) {
+  const v = VESSELS.find(x => x.mmsi === mmsi);
+  if (!v) return;
+  state.selectedMmsi = mmsi;
+  renderMap();
+  const meta = STATUS_META[v.status];
+  const inDark = v.lat >= 25.5 && v.lat <= 27.0 && v.lon >= 55.8 && v.lon <= 57.0;
+  const gaps = DATA.g.filter(g => g[0] === mmsi);
+  const drawer = document.getElementById("vessel-drawer");
+  drawer.classList.remove("hidden");
+  drawer.innerHTML = `
+    <div class="flex items-start justify-between gap-3 px-5 py-4 border-b border-slate-800 bg-[#101726]">
+      <div>
+        <h2 class="text-base font-bold tracking-wide text-slate-100">${v.name}</h2>
+        <div class="mt-1.5 flex flex-wrap gap-1.5 text-[11px] mono">
+          <span class="px-1.5 py-0.5 rounded border" style="color:${meta.color};border-color:${meta.color}55;background:${meta.color}22">${meta.label.toUpperCase()}</span>
+          <span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">${v.cls}</span>
+          <span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">FLAG: ${v.flag}</span>
+          ${v.sanc ? `<span class="px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/40">SANCTIONED</span>` : ""}
+        </div>
+      </div>
+      <button id="close-drawer" class="px-2 py-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer mono text-xs">✕</button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-5 space-y-4">
+      ${(v.sanc || v.status === "ais_gap") ? `
+        <div class="rounded border border-red-500/35 bg-red-500/10 p-3 text-xs text-red-200">
+          <div class="font-semibold uppercase tracking-wider text-red-300">Dark-Fleet / Compliance Alert</div>
+          <p class="mt-0.5">${v.status === "ais_gap" ? `AIS transponder silent for ${v.gap.toFixed(1)}h inside Strait of Hormuz corridor.` : "Vessel flagged on active sanctioned tanker watchlist."}</p>
+        </div>` : ""}
+      <div class="grid grid-cols-2 gap-2.5">
+        <div class="rounded border border-slate-800 bg-[#0B0F19] p-3"><div class="text-[11px] mono text-slate-500">MMSI</div><div class="mt-0.5 text-sm mono font-semibold">${v.mmsi}</div></div>
+        <div class="rounded border border-slate-800 bg-[#0B0F19] p-3"><div class="text-[11px] mono text-slate-500">IMO NUMBER</div><div class="mt-0.5 text-sm mono font-semibold">${v.imo}</div></div>
+        <div class="rounded border border-slate-800 bg-[#0B0F19] p-3"><div class="text-[11px] mono text-slate-500">CLASS / DWT</div><div class="mt-0.5 text-sm mono font-semibold">${v.cls} · ${Math.round(v.dwt/1000)}k DWT</div></div>
+        <div class="rounded border border-slate-800 bg-[#0B0F19] p-3"><div class="text-[11px] mono text-slate-500">EST. CARGO</div><div class="mt-0.5 text-sm mono font-semibold text-emerald-300">${v.bbl.toFixed(2)} Mbbl</div></div>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <div class="rounded border border-slate-800 bg-[#101726] p-2.5"><div class="text-[11px] mono text-slate-400">SPEED</div><div class="mt-1 text-base mono font-semibold">${v.spd.toFixed(1)} <span class="text-xs text-slate-400">kn</span></div></div>
+        <div class="rounded border border-slate-800 bg-[#101726] p-2.5"><div class="text-[11px] mono text-slate-400">HEADING</div><div class="mt-1 text-base mono font-semibold">${v.hdg}°</div></div>
+        <div class="rounded border border-slate-800 bg-[#101726] p-2.5"><div class="text-[11px] mono text-slate-400">DRAFT</div><div class="mt-1 text-base mono font-semibold">${v.dft.toFixed(1)} <span class="text-xs text-slate-400">m</span></div></div>
+      </div>
+      <div class="rounded border border-slate-800 bg-[#101726] p-3 space-y-2 text-xs mono">
+        <div class="flex justify-between"><span class="text-slate-400">DESTINATION</span><span class="font-semibold text-slate-100">${v.dst}</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">POSITION</span><span class="text-slate-200">${v.lat.toFixed(3)}°N, ${v.lon.toFixed(3)}°E</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">DARK CORRIDOR</span><span class="${inDark?'text-red-400':'text-slate-400'}">${inDark?'INSIDE (25.5–27°N)':'OUTSIDE'}</span></div>
+      </div>
+      <div>
+        <div class="text-[11px] mono uppercase text-slate-400 mb-2">AIS Gap Event History (${gaps.length})</div>
+        ${gaps.length ? gaps.map(g => `
+          <div class="rounded border border-red-500/30 bg-[#0B0F19] p-2.5 text-xs mono space-y-1">
+            <div class="flex justify-between"><span class="text-red-300 font-semibold">${g[3]}</span><span class="text-red-400">${g[4].toFixed(1)}h SILENT</span></div>
+            <div class="text-slate-400">Start: ${g[9]} UTC · ${g[5].toFixed(3)}°N, ${g[6].toFixed(3)}°E</div>
+          </div>
+        `).join("") : `<div class="rounded border border-slate-800 bg-[#0B0F19] p-2.5 text-xs mono text-slate-500">No AIS blackout events recorded for this vessel.</div>`}
+      </div>
+    </div>
+  `;
+  document.getElementById("close-drawer").onclick = () => {
+    drawer.classList.add("hidden");
+    state.selectedMmsi = null;
+    renderMap();
+  };
+}
+
+function renderSignals() {
+  const s = DATA.s;
+  const pct = Math.max(0, Math.min(100, (s.shock + 100) / 2));
+  document.getElementById("signal-header").innerHTML = `
+    <div class="flex items-center justify-between gap-2">
+      <div>
+        <div class="text-[11px] mono uppercase text-slate-400">Hormuz Supply Shock Score (-100 to +100)</div>
+        <div class="mt-0.5 flex items-center gap-2">
+          <span class="text-2xl mono font-bold text-amber-400">${fmtSigned(s.shock,1)}</span>
+          <span class="text-[11px] mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">${s.bias} OIL BIAS</span>
+        </div>
+      </div>
+      <div class="text-right">
+        <div class="text-[11px] mono uppercase text-slate-400">72h Brent Forecast (80% CI)</div>
+        <div class="mt-0.5 text-sm mono font-semibold">${fmtSigned(s.p72b,2,"%")} <span class="text-xs font-normal text-slate-400">[${fmtSigned(s.ciL,1)}% to ${fmtSigned(s.ciH,1)}%]</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="relative h-2 rounded-full bg-gradient-to-r from-sky-500/75 via-slate-700 to-red-500/80">
+        <div class="absolute left-1/2 top-0 bottom-0 w-px bg-slate-300/60"></div>
+        <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-3.5 w-3.5 rounded-full bg-white border-2 border-[#0B0F19]" style="left:${pct}%"></div>
+      </div>
+      <div class="mt-1 flex justify-between text-[11px] mono text-slate-500"><span>-100 OVERSUPPLY</span><span>0 BALANCED</span><span>+100 CHOKE SQUEEZE</span></div>
+    </div>
+    <div class="grid grid-cols-3 gap-2">
+      <div class="rounded border border-slate-800 bg-[#101726] px-2.5 py-1.5"><div class="text-[11px] mono text-slate-400">7D FLOW Z</div><div class="text-xs mono font-semibold">${fmtSigned(s.fz,2,"σ")}</div></div>
+      <div class="rounded border border-slate-800 bg-[#101726] px-2.5 py-1.5"><div class="text-[11px] mono text-slate-400">CONGESTION</div><div class="text-xs mono font-semibold text-amber-300">${s.cong.toFixed(1)} / 100</div></div>
+      <div class="rounded border border-slate-800 bg-[#101726] px-2.5 py-1.5"><div class="text-[11px] mono text-slate-400">DARK-FLEET</div><div class="text-xs mono font-semibold text-red-400">${s.dSpike.toFixed(1)} / 100</div></div>
+    </div>
+  `;
+  document.getElementById("hit-rate-label").innerHTML = `HIT RATE: <span class="text-emerald-400 font-semibold">${s.acc.toFixed(1)}%</span> (${s.nbt} OOS)`;
+  renderSignalTab();
+}
+
+function renderSignalTab() {
+  const box = document.getElementById("signal-chart-box");
+  if (state.sigTab === "lags") {
+    const W = 440, H = 140, mid = 70;
+    let svg = `<svg viewBox="0 0 ${W} ${H}" class="w-full h-[145px]">`;
+    [-0.5, 0, 0.5].forEach(v => {
+      const y = mid - v * 110;
+      svg += `<line x1="36" y1="${y}" x2="${W-10}" y2="${y}" stroke="${v===0?'#475569':'#1E293B'}" stroke-dasharray="${v===0?'':'3 3'}"/>`;
+      svg += `<text x="30" y="${y+3}" text-anchor="end" fill="#64748B" font-size="10" font-family="monospace">${v}</text>`;
+    });
+    DATA.lags.forEach((l, i) => {
+      const cx = 105 + i * 130;
+      const hb = l[1] * 110, hw = l[2] * 110;
+      svg += `<rect x="${cx-34}" y="${hb>=0?mid-hb:mid}" width="30" height="${Math.max(3,Math.abs(hb))}" rx="2" fill="#10B981"/>`;
+      svg += `<rect x="${cx+4}" y="${hw>=0?mid-hw:mid}" width="30" height="${Math.max(3,Math.abs(hw))}" rx="2" fill="#38BDF8"/>`;
+      svg += `<text x="${cx}" y="${H-6}" text-anchor="middle" fill="#94A3B8" font-size="10" font-family="monospace">${l[0]}D LAG</text>`;
+    });
+    svg += `</svg>`;
+    const cards = DATA.lags.map(l => `
+      <div class="rounded border border-slate-800 bg-[#0B0F19] px-2 py-1.5 text-center mono">
+        <div class="text-[11px] text-slate-400">${l[0]}D FWD UP PROB</div>
+        <div class="text-xs font-semibold text-emerald-300">BZ ${l[3].toFixed(0)}% · <span class="text-sky-300">CL ${l[4].toFixed(0)}%</span></div>
+      </div>`).join("");
+    box.innerHTML = svg + `<div class="grid grid-cols-3 gap-2 mt-2">${cards}</div>`;
+  } else if (state.sigTab === "shock") {
+    const pts = DATA.ds.slice(-30);
+    const W = 440, H = 195, padL = 36, padR = 10, padT = 12, padB = 22;
+    const xOf = i => padL + (i / (pts.length - 1)) * (W - padL - padR);
+    const yOf = v => padT + ((100 - v) / 200) * (H - padT - padB);
+    const path = pts.map((p,i) => `${i===0?'M':'L'}${xOf(i).toFixed(1)},${yOf(p[1]).toFixed(1)}`).join(" ");
+    const zeroY = yOf(0);
+    let svg = `<svg viewBox="0 0 ${W} ${H}" class="w-full h-[200px]">`;
+    [-50,0,50,100].forEach(v => {
+      const y = yOf(v);
+      svg += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="${v===0?'#475569':'#1E293B'}" stroke-dasharray="${v===0?'':'3 3'}"/>`;
+      svg += `<text x="${padL-4}" y="${y+3}" text-anchor="end" fill="#64748B" font-size="10" font-family="monospace">${v}</text>`;
+    });
+    svg += `<path d="${path} L${xOf(pts.length-1).toFixed(1)},${zeroY.toFixed(1)} L${xOf(0).toFixed(1)},${zeroY.toFixed(1)} Z" fill="#F59E0B" fill-opacity="0.18"/>`;
+    svg += `<path d="${path}" fill="none" stroke="#F59E0B" stroke-width="2"/>`;
+    [0, 10, 20, 29].forEach(i => {
+      svg += `<text x="${xOf(i).toFixed(1)}" y="${H-5}" text-anchor="middle" fill="#94A3B8" font-size="9.5" font-family="monospace">${pts[i][0].slice(5)}</text>`;
+    });
+    svg += `</svg>`;
+    box.innerHTML = svg;
+  } else {
+    const pts = DATA.bt;
+    const W = 440, H = 195, padL = 36, padR = 10, mid = 95, scale = 3.8;
+    const bw = (W - padL - padR) / pts.length;
+    let svg = `<svg viewBox="0 0 ${W} ${H}" class="w-full h-[200px]">`;
+    svg += `<line x1="${padL}" y1="${mid}" x2="${W-padR}" y2="${mid}" stroke="#475569"/>`;
+    [-15, 0, 15].forEach(v => {
+      const y = mid - v * scale;
+      svg += `<text x="${padL-4}" y="${y+3}" text-anchor="end" fill="#64748B" font-size="10" font-family="monospace">${v}%</text>`;
+    });
+    pts.forEach((b, i) => {
+      const x = padL + i * bw + 2;
+      const hAct = Math.max(-80, Math.min(80, b[2] * scale));
+      const hPred = Math.max(-80, Math.min(80, b[1] * scale));
+      svg += `<rect x="${x.toFixed(1)}" y="${(hAct>=0?mid-hAct:mid).toFixed(1)}" width="${(bw*0.44).toFixed(1)}" height="${Math.max(2,Math.abs(hAct)).toFixed(1)}" fill="${b[3]?'#10B981':'#EF4444'}" fill-opacity="0.85"/>`;
+      svg += `<rect x="${(x+bw*0.46).toFixed(1)}" y="${(hPred>=0?mid-hPred:mid).toFixed(1)}" width="${(bw*0.36).toFixed(1)}" height="${Math.max(2,Math.abs(hPred)).toFixed(1)}" fill="#38BDF8" fill-opacity="0.6"/>`;
+    });
+    svg += `<text x="${W/2}" y="${H-6}" text-anchor="middle" fill="#94A3B8" font-size="10" font-family="monospace">Green=Hit · Red=Miss · Cyan=Predicted 3d Return %</text></svg>`;
+    box.innerHTML = svg;
+  }
+}
+
+function renderDualChart() {
+  const candles = state.chartSym === "BZ=F" ? DATA.bz : DATA.cl;
+  const sigMap = new Map(DATA.ds.map(x => [x[0], x]));
+  const divDates = new Set();
+  DATA.divs.forEach(([s, e]) => {
+    for (let d = new Date(s); d <= new Date(e); d.setUTCDate(d.getUTCDate() + 1)) {
+      divDates.add(d.toISOString().slice(0, 10));
+    }
+  });
+
+  const W = 1200, H = 290, padL = 52, padR = 58, padT = 26, padB = 26;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const pMin = Math.min(...candles.map(c => c[3])) - 2;
+  const pMax = Math.max(...candles.map(c => c[2])) + 2;
+  const flowVals = candles.map(c => {
+    const s = sigMap.get(c[0]);
+    return s ? (state.chartMetric === "count" ? s[2] : s[4]) : 22;
+  });
+  const fMax = Math.max(...flowVals) * 1.6;
+  const step = plotW / candles.length;
+  const yP = v => padT + ((pMax - v) / (pMax - pMin)) * plotH;
+  const yF = v => padT + plotH - (v / fMax) * plotH;
+
+  let svg = "";
+  for (let i = 0; i <= 4; i++) {
+    const p = pMin + (i / 4) * (pMax - pMin);
+    const y = yP(p);
+    svg += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="#1E293B" stroke-dasharray="3 3"/>`;
+    svg += `<text x="${W-padR+6}" y="${(y+3).toFixed(1)}" fill="#94A3B8" font-size="11" font-family="monospace">$${p.toFixed(0)}</text>`;
+    const fv = (i / 4) * fMax;
+    svg += `<text x="${padL-6}" y="${(yF(fv)+3).toFixed(1)}" text-anchor="end" fill="#64748B" font-size="11" font-family="monospace">${fv.toFixed(0)}</text>`;
+  }
+
+  // Flow histogram + 7d MA
+  let maPath = "";
+  candles.forEach((c, i) => {
+    const cx = padL + i * step + step / 2;
+    const s = sigMap.get(c[0]);
+    if (s) {
+      const fv = state.chartMetric === "count" ? s[2] : s[4];
+      const ma = state.chartMetric === "count" ? s[3] : s[3] * 1.38;
+      const inDiv = divDates.has(c[0]);
+      const bh = (fv / fMax) * plotH;
+      svg += `<rect x="${(cx - step*0.36).toFixed(1)}" y="${(padT + plotH - bh).toFixed(1)}" width="${(step*0.72).toFixed(1)}" height="${bh.toFixed(1)}" fill="${inDiv?'rgba(245,158,11,0.5)':'rgba(56,189,248,0.22)'}"/>`;
+      maPath += (maPath ? " L" : "M") + `${cx.toFixed(1)},${yF(ma).toFixed(1)}`;
+    }
+  });
+  if (maPath) svg += `<path d="${maPath}" fill="none" stroke="#38BDF8" stroke-width="2"/>`;
+
+  // Candlesticks + hover hit zones
+  candles.forEach((c, i) => {
+    const cx = padL + i * step + step / 2;
+    const up = c[4] >= c[1];
+    const col = up ? "#10B981" : "#EF4444";
+    const yHi = yP(c[2]), yLo = yP(c[3]), yTop = yP(Math.max(c[1], c[4])), yBot = yP(Math.min(c[1], c[4]));
+    svg += `<line x1="${cx.toFixed(1)}" y1="${yHi.toFixed(1)}" x2="${cx.toFixed(1)}" y2="${yLo.toFixed(1)}" stroke="${col}" stroke-width="1.5"/>`;
+    svg += `<rect x="${(cx - step*0.26).toFixed(1)}" y="${yTop.toFixed(1)}" width="${(step*0.52).toFixed(1)}" height="${Math.max(2, yBot - yTop).toFixed(1)}" fill="${col}"/>`;
+    if (i % 5 === 0) {
+      svg += `<text x="${cx.toFixed(1)}" y="${H-6}" text-anchor="middle" fill="#64748B" font-size="10.5" font-family="monospace">${c[0].slice(5)}</text>`;
+    }
+    svg += `<rect class="c-hit" data-idx="${i}" x="${(padL + i*step).toFixed(1)}" y="${padT}" width="${step.toFixed(1)}" height="${plotH}" fill="transparent"/>`;
+  });
+
+  // Divergence arrows
+  DATA.divs.forEach(z => {
+    const idx = candles.findIndex(c => c[0] >= z[0]);
+    if (idx < 0) return;
+    const cx = padL + idx * step + step / 2;
+    const y = Math.max(22, yP(candles[idx][2]) - 12);
+    svg += `<text x="${cx.toFixed(1)}" y="${(y-5).toFixed(1)}" text-anchor="middle" fill="#F59E0B" font-size="10.5" font-weight="bold" font-family="monospace">▼ CHOKE ${z[3].toFixed(0)}%</text>`;
+  });
+
+  const el = document.getElementById("dual-chart-svg");
+  el.innerHTML = svg;
+  el.querySelectorAll(".c-hit").forEach(r => {
+    r.addEventListener("mouseenter", () => {
+      const c = candles[Number(r.dataset.idx)];
+      const s = sigMap.get(c[0]);
+      document.getElementById("chart-hover-readout").innerHTML =
+        `<span class="text-slate-300">${c[0]}</span> · O:$${c[1]} H:$${c[2]} L:$${c[3]} <span class="text-emerald-300 font-semibold">C:$${c[4]}</span>` +
+        (s ? ` · Outbound: <span class="text-sky-300">${s[2]} tankers (${s[4]} Mbbl)</span> · Shock: <span class="text-amber-300">${fmtSigned(s[1],1)}</span>` : "");
+    });
+  });
+
+  document.getElementById("divergence-cards").innerHTML = DATA.divs.map(z => `
+    <div class="rounded border border-amber-500/25 bg-[#0B0F19] px-3 py-2 mono">
+      <div class="flex justify-between text-xs"><span class="font-semibold text-amber-300 truncate">${z[2]}</span><span class="text-slate-500">SHOCK +${z[5].toFixed(0)}</span></div>
+      <div class="flex justify-between text-[11px] text-slate-400 mt-1"><span>${z[0]} → ${z[1]}</span><span class="text-slate-200">Flow ${z[3].toFixed(0)}% · <span class="text-emerald-400">BZ +${z[4].toFixed(1)}%</span></span></div>
+    </div>
+  `).join("");
+}
+
+function renderStressTest() {
+  const s = DATA.s;
+  const vlcc = state.vlcc, ais = state.ais, cong = state.cong, dur = state.dur;
+  document.getElementById("lbl-vlcc").textContent = `-${vlcc}%`;
+  document.getElementById("lbl-ais").textContent = `${ais.toFixed(1)}x baseline`;
+  document.getElementById("lbl-cong").textContent = `+${cong}%`;
+  document.getElementById("lbl-dur").textContent = `${dur} days`;
+
+  const effLoss = (vlcc / 100) * 0.72 + Math.pow(vlcc / 100, 1.6) * 0.25;
+  const disrupted = s.b30m * Math.min(0.85, effLoss);
+  const durFactor = 0.65 + 0.35 * Math.log1p(dur) / Math.log1p(7);
+  const bPct = Math.min(48, (0.19 * vlcc + 0.0022 * vlcc * vlcc) * durFactor + Math.max(0, (ais - 1) * 1.15) + (cong / 100) * 2.1);
+  const wPct = bPct * 0.86;
+  const bUsd = s.bp * (bPct / 100);
+  const wUsd = s.wp * (wPct / 100);
+  const pShock = Math.max(-100, Math.min(100, s.shock + vlcc * 1.35 + (ais - 1) * 9.5 + cong * 0.25));
+  const regime = pShock >= 75 ? "SEVERE CHOKEPOINT CRISIS" : pShock >= 45 ? "ELEVATED SUPPLY SQUEEZE" : pShock >= 20 ? "MODERATE TIGHTENING" : "NORMAL TRANSIT REGIME";
+
+  const badge = document.getElementById("stress-regime-badge");
+  badge.textContent = regime;
+  badge.className = "text-[11px] mono px-2 py-0.5 rounded border " + (pShock >= 75 ? "bg-red-500/15 text-red-300 border-red-500/35" : pShock >= 45 ? "bg-amber-500/15 text-amber-300 border-amber-500/35" : "bg-sky-500/15 text-sky-300 border-sky-500/35");
+
+  document.getElementById("stress-cards").innerHTML = `
+    <div class="rounded border border-emerald-500/30 bg-[#0B0F19] p-2.5 mono">
+      <div class="text-[11px] text-slate-400">PROJECTED BRENT</div>
+      <div class="mt-0.5 text-base font-bold text-emerald-300">$${(s.bp+bUsd).toFixed(2)}</div>
+      <div class="text-xs text-emerald-400">+${bUsd.toFixed(2)} (+${bPct.toFixed(1)}%)</div>
+    </div>
+    <div class="rounded border border-sky-500/30 bg-[#0B0F19] p-2.5 mono">
+      <div class="text-[11px] text-slate-400">PROJECTED WTI</div>
+      <div class="mt-0.5 text-base font-bold text-sky-300">$${(s.wp+wUsd).toFixed(2)}</div>
+      <div class="text-xs text-sky-400">+${wUsd.toFixed(2)} (+${wPct.toFixed(1)}%)</div>
+    </div>
+    <div class="rounded border border-slate-800 bg-[#0B0F19] p-2.5 mono">
+      <div class="text-[11px] text-slate-400">DISRUPTED SUPPLY</div>
+      <div class="mt-0.5 text-base font-bold text-amber-300">${disrupted.toFixed(1)} <span class="text-xs font-normal text-slate-400">Mbbl/d</span></div>
+      <div class="text-[11px] text-slate-500">Seaborne At Risk</div>
+    </div>
+    <div class="rounded border border-slate-800 bg-[#0B0F19] p-2.5 mono">
+      <div class="text-[11px] text-slate-400">STRESSED SHOCK</div>
+      <div class="mt-0.5 text-base font-bold text-red-400">${fmtSigned(pShock,1)}</div>
+      <div class="text-[11px] text-slate-500">Scale -100..+100</div>
+    </div>
+  `;
+
+  const curve = [];
+  for (let d = 0; d <= 7; d++) {
+    const frac = d === 0 ? 0 : (1 - Math.exp(-d / Math.max(1.4, dur * 0.45))) * (d <= dur ? 1 : Math.exp(-(d - dur) * 0.14));
+    const bb = s.bp * (1 + 0.0012 * d), bw = s.wp * (1 + 0.001 * d);
+    curve.push({ lbl: d===0?"Spot":`T+${d}d`, bb, sb: bb + bUsd * frac, sw: bw + wUsd * frac });
+  }
+  const W = 680, H = 165, pL = 48, pR = 16, pT = 12, pB = 22;
+  const lo = Math.min(...curve.map(x => x.sw)) - 2, hi = Math.max(...curve.map(x => x.sb)) + 2;
+  const xOf = i => pL + (i / 7) * (W - pL - pR);
+  const yOf = v => pT + ((hi - v) / (hi - lo)) * (H - pT - pB);
+  const line = key => curve.map((c,i) => `${i===0?'M':'L'}${xOf(i).toFixed(1)},${yOf(c[key]).toFixed(1)}`).join(" ");
+  let svg = "";
+  for (let i = 0; i <= 3; i++) {
+    const val = lo + (i/3)*(hi-lo), y = yOf(val);
+    svg += `<line x1="${pL}" y1="${y.toFixed(1)}" x2="${W-pR}" y2="${y.toFixed(1)}" stroke="#1E293B" stroke-dasharray="3 3"/>`;
+    svg += `<text x="${pL-6}" y="${(y+3).toFixed(1)}" text-anchor="end" fill="#64748B" font-size="10.5" font-family="monospace">$${val.toFixed(0)}</text>`;
+  }
+  svg += `<path d="${line('bb')}" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+  svg += `<path d="${line('sb')}" fill="none" stroke="#10B981" stroke-width="2.4"/>`;
+  svg += `<path d="${line('sw')}" fill="none" stroke="#38BDF8" stroke-width="2"/>`;
+  curve.forEach((c,i) => {
+    svg += `<circle cx="${xOf(i).toFixed(1)}" cy="${yOf(c.sb).toFixed(1)}" r="3.2" fill="#10B981"/>`;
+    svg += `<circle cx="${xOf(i).toFixed(1)}" cy="${yOf(c.sw).toFixed(1)}" r="3" fill="#38BDF8"/>`;
+    svg += `<text x="${xOf(i).toFixed(1)}" y="${H-5}" text-anchor="middle" fill="#94A3B8" font-size="10.5" font-family="monospace">${c.lbl}</text>`;
+  });
+  document.getElementById("stress-svg").innerHTML = svg;
+}
+
+function renderAnomalyLog() {
+  const thead = document.getElementById("log-thead");
+  const tbody = document.getElementById("log-tbody");
+  if (state.logTab === "dark") {
+    thead.innerHTML = `<tr><th class="py-2 px-3">Vessel / MMSI</th><th class="py-2 px-3">Class</th><th class="py-2 px-3">Severity</th><th class="py-2 px-3">Silence</th><th class="py-2 px-3">Last Position</th><th class="py-2 px-3">Status</th><th class="py-2 px-3 text-right">Action</th></tr>`;
+    tbody.innerHTML = DATA.g.map(g => `
+      <tr data-mmsi="${g[0]}" class="log-row hover:bg-[#162033]/80 cursor-pointer mono">
+        <td class="py-2 px-3"><div class="font-semibold text-slate-100">${g[1]} ${g[7]?'<span class="text-red-400 text-[10px]">[SANC]</span>':''}</div><div class="text-[11px] text-slate-500">${g[0]}</div></td>
+        <td class="py-2 px-3 text-slate-300">${g[2]}</td>
+        <td class="py-2 px-3"><span class="px-1.5 py-0.5 rounded text-[10px] ${g[3]==='CRITICAL'?'bg-red-500/15 text-red-300 border border-red-500/35':'bg-amber-500/15 text-amber-300 border border-amber-500/30'}">${g[3]}</span></td>
+        <td class="py-2 px-3 text-red-300">${g[4].toFixed(1)}h</td>
+        <td class="py-2 px-3 text-slate-300">${g[5].toFixed(3)}°N, ${g[6].toFixed(3)}°E</td>
+        <td class="py-2 px-3 ${g[8]?'text-red-400':'text-slate-400'}">${g[8]?'ACTIVE DARK':'RESOLVED · '+g[9].slice(5)}</td>
+        <td class="py-2 px-3 text-right text-sky-400">LOCATE</td>
+      </tr>`).join("");
+  } else {
+    const loit = VESSELS.filter(v => v.status === "loitering");
+    thead.innerHTML = `<tr><th class="py-2 px-3">Vessel / MMSI</th><th class="py-2 px-3">Class</th><th class="py-2 px-3">Speed</th><th class="py-2 px-3">Draft</th><th class="py-2 px-3">Destination</th><th class="py-2 px-3">Position</th><th class="py-2 px-3 text-right">Action</th></tr>`;
+    tbody.innerHTML = loit.map(v => `
+      <tr data-mmsi="${v.mmsi}" class="log-row hover:bg-[#162033]/80 cursor-pointer mono">
+        <td class="py-2 px-3"><div class="font-semibold text-slate-100">${v.name}</div><div class="text-[11px] text-slate-500">${v.mmsi} · ${v.imo}</div></td>
+        <td class="py-2 px-3 text-slate-300">${v.cls}</td>
+        <td class="py-2 px-3 text-amber-300">${v.spd.toFixed(1)} kn</td>
+        <td class="py-2 px-3 text-slate-300">${v.dft.toFixed(1)} m</td>
+        <td class="py-2 px-3 text-slate-300">${v.dst}</td>
+        <td class="py-2 px-3 text-slate-400">${v.lat.toFixed(3)}°N, ${v.lon.toFixed(3)}°E</td>
+        <td class="py-2 px-3 text-right text-sky-400">LOCATE</td>
+      </tr>`).join("");
+  }
+  tbody.querySelectorAll(".log-row").forEach(row => {
+    row.onclick = () => {
+      const m = row.dataset.mmsi;
+      const v = VESSELS.find(x => x.mmsi === m);
+      if (v) { state.centerLon = v.lon; state.centerLat = v.lat; state.zoom = 1.6; openVesselDrawer(m); }
+    };
+  });
+}
+
+// Event bindings
+document.getElementById("toggle-tss").onclick = e => { state.showTss = !state.showTss; e.target.style.opacity = state.showTss ? "1" : "0.45"; renderMap(); };
+document.getElementById("toggle-dark").onclick = e => { state.showDark = !state.showDark; e.target.style.opacity = state.showDark ? "1" : "0.45"; renderMap(); };
+document.getElementById("toggle-anch").onclick = e => { state.showAnch = !state.showAnch; e.target.style.opacity = state.showAnch ? "1" : "0.45"; renderMap(); };
+document.getElementById("zoom-in").onclick = () => { state.zoom = Math.min(2.6, state.zoom * 1.25); renderMap(); };
+document.getElementById("zoom-out").onclick = () => { state.zoom = Math.max(0.85, state.zoom / 1.25); renderMap(); };
+document.getElementById("zoom-reset").onclick = () => { state.zoom = 1; state.centerLon = 56.55; state.centerLat = 26.0; renderMap(); };
+
+document.querySelectorAll(".sig-tab").forEach(btn => {
+  btn.onclick = () => {
+    state.sigTab = btn.dataset.tab;
+    document.querySelectorAll(".sig-tab").forEach(b => b.className = "sig-tab px-2.5 py-1 rounded cursor-pointer " + (b.dataset.tab===state.sigTab ? "bg-[#1B2840] text-slate-100" : "text-slate-400 hover:text-slate-200"));
+    renderSignalTab();
+  };
+});
+
+document.getElementById("sym-bz").onclick = () => { state.chartSym = "BZ=F"; document.getElementById("sym-bz").className="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/35 cursor-pointer"; document.getElementById("sym-cl").className="px-2.5 py-0.5 rounded text-slate-400 hover:text-slate-200 cursor-pointer"; renderDualChart(); };
+document.getElementById("sym-cl").onclick = () => { state.chartSym = "CL=F"; document.getElementById("sym-cl").className="px-2.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/35 cursor-pointer"; document.getElementById("sym-bz").className="px-2.5 py-0.5 rounded text-slate-400 hover:text-slate-200 cursor-pointer"; renderDualChart(); };
+document.getElementById("met-cnt").onclick = () => { state.chartMetric = "count"; document.getElementById("met-cnt").className="px-2 py-0.5 rounded bg-[#1C2A45] text-slate-100 cursor-pointer"; document.getElementById("met-mbbl").className="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 cursor-pointer"; renderDualChart(); };
+document.getElementById("met-mbbl").onclick = () => { state.chartMetric = "mbbl"; document.getElementById("met-mbbl").className="px-2 py-0.5 rounded bg-[#1C2A45] text-slate-100 cursor-pointer"; document.getElementById("met-cnt").className="px-2 py-0.5 rounded text-slate-400 hover:text-slate-200 cursor-pointer"; renderDualChart(); };
+
+document.getElementById("sl-vlcc").oninput = e => { state.vlcc = Number(e.target.value); renderStressTest(); };
+document.getElementById("sl-ais").oninput = e => { state.ais = Number(e.target.value); renderStressTest(); };
+document.getElementById("sl-cong").oninput = e => { state.cong = Number(e.target.value); renderStressTest(); };
+document.getElementById("sl-dur").oninput = e => { state.dur = Number(e.target.value); renderStressTest(); };
+document.querySelectorAll(".preset-btn").forEach(btn => {
+  btn.onclick = () => {
+    const p = Number(btn.dataset.preset);
+    const cfg = p===50 ? [50,3.5,65,7] : p===30 ? [30,2.0,25,5] : p===15 ? [15,1.5,15,4] : [0,1.0,0,1];
+    [state.vlcc, state.ais, state.cong, state.dur] = cfg;
+    document.getElementById("sl-vlcc").value = state.vlcc;
+    document.getElementById("sl-ais").value = state.ais;
+    document.getElementById("sl-cong").value = state.cong;
+    document.getElementById("sl-dur").value = state.dur;
+    renderStressTest();
+  };
+});
+
+document.getElementById("tab-dark-log").onclick = () => { state.logTab = "dark"; document.getElementById("tab-dark-log").className="px-2.5 py-1 rounded bg-[#1B2840] text-slate-100 cursor-pointer"; document.getElementById("tab-loit-log").className="px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 cursor-pointer"; renderAnomalyLog(); };
+document.getElementById("tab-loit-log").onclick = () => { state.logTab = "loit"; document.getElementById("tab-loit-log").className="px-2.5 py-1 rounded bg-[#1B2840] text-slate-100 cursor-pointer"; document.getElementById("tab-dark-log").className="px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 cursor-pointer"; renderAnomalyLog(); };
+
+// Initial Render
+renderKpis();
+renderMap();
+renderSignals();
+renderDualChart();
+renderStressTest();
+renderAnomalyLog();
+</script>
+</body>
+</html>

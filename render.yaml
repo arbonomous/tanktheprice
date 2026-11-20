@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: hormuzflow-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: FEED_MODE
+        value: auto
+      - key: DATABASE_URL
+        value: sqlite:///./data/hormuzflow.db
+      - key: STRAITS_LIVE_API_KEY
+        sync: false
+      - key: DATALASTIC_API_KEY
+        sync: false
+      - key: MARINETRAFFIC_API_KEY
+        sync: false
+      - key: ALPHAVANTAGE_API_KEY
+        sync: false
+
+  - type: web
+    name: hormuzflow-web
+    runtime: node
+    rootDir: frontend
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start -- -p $PORT -H 0.0.0.0
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: hormuzflow-api
+          property: hostport
+          prefix: "https://"
