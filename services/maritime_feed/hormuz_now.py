@@ -36,7 +36,9 @@ def _pick(d: dict[str, Any], *keys: str, default: Any = None) -> Any:
 class HormuzNowAdapter(MaritimeAdapter):
     """
     Pulls real-time Strait of Hormuz vessel positions (/api/snapshot), daily crossings
-    (/api/daily.json, /api/traffic), and AIS-silent vessels (/api/areas) from hormuz.now (CC BY 4.0).
+    (/api/daily.json, /api/traffic), 2-year IMF PortWatch history (/api/portwatch),
+    waiting queues & AIS-silent ships (/api/areas), and Gulf port exports (/api/ports)
+    from hormuz.now (CC BY 4.0).
     """
 
     name = "hormuz_now"
@@ -46,7 +48,10 @@ class HormuzNowAdapter(MaritimeAdapter):
     SNAPSHOT_ENDPOINT = "/api/snapshot"
     DAILY_ENDPOINT = "/api/daily.json"
     TRAFFIC_ENDPOINT = "/api/traffic"
+    PORTWATCH_ENDPOINT = "/api/portwatch"
     AREAS_ENDPOINT = "/api/areas"
+    PORTS_ENDPOINT = "/api/ports"
+    STATUS_ENDPOINT = "/status.json"
 
     def __init__(self, timeout_seconds: float = 12.0) -> None:
         self.timeout_seconds = timeout_seconds
@@ -85,7 +90,7 @@ class HormuzNowAdapter(MaritimeAdapter):
             draft = float(draft_val) if draft_val is not None else (
                 15.2 if (90.0 <= heading <= 160.0 and speed >= 4.0) else 10.2
             )
-            if draft > 35.0:  # decimeters guard
+            if draft > 35.0:
                 draft = draft / 10.0
 
             dwt_val = _pick(raw, "dwt", "deadweight")
@@ -154,6 +159,201 @@ class HormuzNowAdapter(MaritimeAdapter):
         except Exception:
             return None
 
+    @staticmethod
+    def _parse_daily_row(row: dict[str, Any], source: str) -> DailyTransitPoint | None:
+        raw_d = _pick(row, "date", "day", "d")
+        if not raw_d:
+            return None
+        try:
+            d = date.fromisoformat(str(raw_d)[:10])
+        except Exception:
+            return None
+
+        # PortWatch rows use n_tanker / tankers / tanker / n_total; daily.json uses in / out / tankers / total
+        tankers_raw = _pick(row, "n_tanker", "tankers", "tanker", "tanker_transits")
+        out_raw = _pick(row, "out", "outbound", "outbound_laden")
+        in_raw = _pick(row, "in", "inbound", "inbound_ballast")
+        total_raw = _pick(row, "total", "n_total", "transits")
+
+        if out_raw is not None:
+            outbound = max(0, int(round(float(out_raw))))
+            inbound = max(0, int(round(float(in_raw or 0))))
+        elif tankers_raw is not None:
+            t_cnt = max(0, int(round(float(tankers_raw))))
+            outbound = round(t_cnt * 0.52)
+            inbound = max(0, t_cnt - outbound)
+        elif total_raw is not None:
+            tot = max(0, int(round(float(total_raw))))
+            outbound = round(tot * 0.29)
+            inbound = round(tot * 0.27)
+        else:
+            return None
+
+        vlcc = max(0, round(outbound * 0.44))
+        suez = max(0, round(outbound * 0.34))
+        afra = max(0, outbound - vlcc - suez)
+        cap_raw = float(_pick(row, "capacity_tanker", "tankerCapacity", "dwt", default=0.0) or 0.0)
+        cap_mt = cap_raw / 1_000_000.0 if cap_raw > 10_000 else cap_raw
+        tonnage = round(cap_mt * 0.52, 3) if cap_mt > 0.05 else round(vlcc * 0.305 + suez * 0.155 + afra * 0.108, 3)
+        barrels = round(vlcc * 2.02 + suez * 1.02 + afra * 0.72, 2)
+
+        return DailyTransitPoint(
+            transit_date=d,
+            outbound_laden_count=outbound,
+            inbound_ballast_count=inbound,
+            vlcc_count=vlcc,
+            suezmax_count=suez,
+            aframax_count=afra,
+            outbound_tonnage_mt=tonnage,
+            outbound_barrels_mbbl=barrels,
+            avg_speed_knots=round(float(_pick(row, "avgSpeed", "avg_speed", default=11.4)), 2),
+            loitering_count=max(0, int(_pick(row, "waiting", "loitering", default=max(2, round(max(0, 22 - outbound) * 0.6))))),
+            ais_gap_count=max(0, int(_pick(row, "aisGaps", "silent", default=2))),
+            congestion_index=round(min(95.0, max(10.0, 72.0 - outbound * 2.3)), 1),
+            source=source,
+        )
+
+    async def fetch_rich_context(self, days: int = 730) -> dict[str, Any]:
+        """
+        Fetch 2-year stitched daily history (/api/portwatch + /api/daily.json),
+        plus live waiting queues (/status.json, /api/areas) and Gulf port exports (/api/ports).
+        """
+        context: dict[str, Any] = {
+            "history_transits": [],
+            "waiting_gulf": 0,
+            "waiting_oman": 0,
+            "fleet_total": 0,
+            "fleet_tankers": 0,
+            "gulf_export_pct_normal": 100.0,
+            "ais_silent_count": 0,
+            "status_level": "unknown",
+            "status_pct_normal": None,
+            "source": self.name,
+        }
+
+        by_date: dict[date, DailyTransitPoint] = {}
+
+        try:
+            client_ctx = httpx.AsyncClient(
+                base_url=self.BASE_URL,
+                timeout=self.timeout_seconds,
+                follow_redirects=True,
+                headers={"User-Agent": "HormuzFlow/2.0 (+https://github.com/arbonomous/tanktheprice)"},
+            )
+        except Exception as exc:
+            logger.info("hormuz.now rich context client unavailable (%s); using fallback", exc)
+            return context
+
+        async with client_ctx as client:
+            # 1. Multi-year IMF PortWatch history stored on hormuz.now (/api/portwatch)
+            try:
+                resp = await client.get(self.PORTWATCH_ENDPOINT)
+                if resp.status_code == 200:
+                    pdata = resp.json()
+                    rows = (
+                        pdata
+                        if isinstance(pdata, list)
+                        else (pdata.get("days") or pdata.get("daily") or pdata.get("series") or pdata.get("data") or [])
+                    )
+                    if rows and isinstance(rows[0], dict):
+                        logger.info("hormuz.now /api/portwatch rows=%d keys=%s", len(rows), list(rows[0].keys())[:10])
+                    for row in rows[-days:]:
+                        if isinstance(row, dict):
+                            pt = self._parse_daily_row(row, source="imf_portwatch")
+                            if pt:
+                                by_date[pt.transit_date] = pt
+            except Exception as exc:
+                logger.info("hormuz.now /api/portwatch unavailable: %s", exc)
+
+            # 2. Stitch latest live daily crossings on top (/api/daily.json)
+            try:
+                resp = await client.get(self.DAILY_ENDPOINT)
+                if resp.status_code == 200:
+                    ddata = resp.json()
+                    rows = (
+                        ddata
+                        if isinstance(ddata, list)
+                        else (ddata.get("days") or ddata.get("daily") or ddata.get("data") or [])
+                    )
+                    for row in rows:
+                        if isinstance(row, dict):
+                            pt = self._parse_daily_row(row, source=self.name)
+                            if pt:
+                                by_date[pt.transit_date] = pt
+            except Exception as exc:
+                logger.info("hormuz.now /api/daily.json unavailable: %s", exc)
+
+            # 3. Live status + waiting queues (/status.json)
+            try:
+                resp = await client.get(self.STATUS_ENDPOINT)
+                if resp.status_code == 200:
+                    sdata = resp.json()
+                    if isinstance(sdata, dict):
+                        fleet = sdata.get("fleet") or {}
+                        st = sdata.get("status") or {}
+                        context["waiting_gulf"] = int(fleet.get("waitingGulf") or 0)
+                        context["waiting_oman"] = int(fleet.get("waitingOman") or 0)
+                        context["fleet_total"] = int(fleet.get("vessels") or 0)
+                        context["fleet_tankers"] = int(fleet.get("tankers") or 0)
+                        context["status_level"] = str(st.get("level") or "unknown")
+                        if st.get("pct") is not None:
+                            context["status_pct_normal"] = round(float(st["pct"]), 1)
+            except Exception as exc:
+                logger.debug("hormuz.now /status.json unavailable: %s", exc)
+
+            # 4. AIS-silent count from /api/areas
+            try:
+                resp = await client.get(self.AREAS_ENDPOINT)
+                if resp.status_code == 200:
+                    adata = resp.json()
+                    if isinstance(adata, dict):
+                        silent_obj = (
+                            adata.get("aisSilent")
+                            or adata.get("silentShips")
+                            or adata.get("silent")
+                            or adata.get("aisSilentShips")
+                        )
+                        if isinstance(silent_obj, list):
+                            context["ais_silent_count"] = len(silent_obj)
+                        elif isinstance(silent_obj, dict):
+                            lst = silent_obj.get("ships") or silent_obj.get("vessels") or silent_obj.get("list") or []
+                            context["ais_silent_count"] = int(silent_obj.get("count") or len(lst))
+                        elif isinstance(silent_obj, (int, float)):
+                            context["ais_silent_count"] = int(silent_obj)
+            except Exception as exc:
+                logger.debug("hormuz.now /api/areas context unavailable: %s", exc)
+
+            # 5. Gulf export calls vs. pre-crisis normal from /api/ports
+            try:
+                resp = await client.get(self.PORTS_ENDPOINT)
+                if resp.status_code == 200:
+                    pdata = resp.json()
+                    ports = pdata if isinstance(pdata, list) else (pdata.get("ports") or pdata.get("data") or [])
+                    shares = []
+                    for p in ports:
+                        if not isinstance(p, dict):
+                            continue
+                        sh = _pick(p, "shareOfNormal", "pctNormal", "pct", "ratio")
+                        if sh is not None:
+                            val = float(sh)
+                            shares.append(val * 100.0 if val <= 2.5 else val)
+                    if shares:
+                        context["gulf_export_pct_normal"] = round(sum(shares) / len(shares), 1)
+            except Exception as exc:
+                logger.debug("hormuz.now /api/ports unavailable: %s", exc)
+
+        ordered = sorted(by_date.values(), key=lambda x: x.transit_date)[-days:]
+        context["history_transits"] = ordered
+        logger.info(
+            "hormuz.now rich context: %d history days | waitingGulf=%d waitingOman=%d | gulfExports=%.1f%% | aisSilent=%d",
+            len(ordered),
+            context["waiting_gulf"],
+            context["waiting_oman"],
+            context["gulf_export_pct_normal"],
+            context["ais_silent_count"],
+        )
+        return context
+
     async def fetch(self, days: int = 45) -> MaritimeFeedPayload:
         vessels: list[VesselSnapshot] = []
         daily_transits: list[DailyTransitPoint] = []
@@ -164,30 +364,18 @@ class HormuzNowAdapter(MaritimeAdapter):
             base_url=self.BASE_URL,
             timeout=self.timeout_seconds,
             follow_redirects=True,
-            headers={"User-Agent": "HormuzFlow/1.0 (+https://github.com/arbonomous/tanktheprice)"},
+            headers={"User-Agent": "HormuzFlow/2.0 (+https://github.com/arbonomous/tanktheprice)"},
         ) as client:
-            # 1. Live vessels from /api/snapshot (full named-key JSON)
+            # 1. Live vessels from /api/snapshot
             try:
                 resp = await client.get(self.SNAPSHOT_ENDPOINT)
                 if resp.status_code == 200:
                     payload = resp.json()
-                    if isinstance(payload, dict):
-                        logger.info("hormuz.now /api/snapshot keys=%s", list(payload.keys())[:10])
-                        rows = (
-                            payload.get("vessels")
-                            or payload.get("ships")
-                            or payload.get("data")
-                            or payload.get("positions")
-                            or []
-                        )
-                    elif isinstance(payload, list):
-                        rows = payload
-                    else:
-                        rows = []
-
-                    if rows and isinstance(rows[0], dict):
-                        logger.info("hormuz.now sample vessel keys=%s", list(rows[0].keys())[:15])
-
+                    rows = (
+                        payload
+                        if isinstance(payload, list)
+                        else (payload.get("vessels") or payload.get("ships") or payload.get("data") or [])
+                    )
                     tanker_rows = [r for r in rows if isinstance(r, dict) and self._is_tanker_row(r)]
                     chosen_rows = tanker_rows if len(tanker_rows) >= 10 else [r for r in rows if isinstance(r, dict)]
 
@@ -197,7 +385,6 @@ class HormuzNowAdapter(MaritimeAdapter):
                         if v:
                             parsed.append(v)
 
-                    # Prioritize moving, dark-corridor, and larger tankers inside Strait (cap at 120 for map clarity)
                     parsed.sort(
                         key=lambda v: (
                             1 if v.status == "ais_gap" else 0,
@@ -230,52 +417,13 @@ class HormuzNowAdapter(MaritimeAdapter):
                     rows = (
                         payload
                         if isinstance(payload, list)
-                        else (
-                            payload.get("days")
-                            or payload.get("daily")
-                            or payload.get("crossings")
-                            or payload.get("data")
-                            or []
-                        )
+                        else (payload.get("days") or payload.get("daily") or payload.get("crossings") or payload.get("data") or [])
                     )
-                    if rows and isinstance(rows[0], dict):
-                        logger.info("hormuz.now %s sample row keys=%s", endpoint, list(rows[0].keys())[:12])
                     for row in rows[-days:]:
-                        if not isinstance(row, dict):
-                            continue
-                        raw_d = _pick(row, "date", "day", "d")
-                        if not raw_d:
-                            continue
-                        try:
-                            d = date.fromisoformat(str(raw_d)[:10])
-                        except Exception:
-                            continue
-                        outbound = int(_pick(row, "out", "outbound", "outbound_laden", default=0))
-                        inbound = int(_pick(row, "in", "inbound", "inbound_ballast", default=0))
-                        tankers = int(_pick(row, "tankers", "tanker", "n_tanker", default=outbound))
-                        eff_out = max(outbound, round(tankers * 0.52)) if (outbound == 0 and tankers > 0) else outbound
-                        vlcc = max(0, round(eff_out * 0.44))
-                        suez = max(0, round(eff_out * 0.34))
-                        afra = max(0, eff_out - vlcc - suez)
-                        tonnage = round(vlcc * 0.305 + suez * 0.155 + afra * 0.108, 3)
-                        barrels = round(vlcc * 2.02 + suez * 1.02 + afra * 0.72, 2)
-                        daily_transits.append(
-                            DailyTransitPoint(
-                                transit_date=d,
-                                outbound_laden_count=eff_out,
-                                inbound_ballast_count=inbound,
-                                vlcc_count=vlcc,
-                                suezmax_count=suez,
-                                aframax_count=afra,
-                                outbound_tonnage_mt=tonnage,
-                                outbound_barrels_mbbl=barrels,
-                                avg_speed_knots=11.4,
-                                loitering_count=max(2, int(_pick(row, "waiting", default=5))),
-                                ais_gap_count=int(_pick(row, "aisGaps", "silent", default=2)),
-                                congestion_index=round(min(95.0, max(15.0, 68.0 - eff_out * 2.1)), 1),
-                                source=self.name,
-                            )
-                        )
+                        if isinstance(row, dict):
+                            pt = self._parse_daily_row(row, source=self.name)
+                            if pt:
+                                daily_transits.append(pt)
                 except Exception as exc:
                     logger.info("hormuz.now %s error: %s", endpoint, exc)
 
@@ -289,10 +437,11 @@ class HormuzNowAdapter(MaritimeAdapter):
                             adata.get("aisSilent")
                             or adata.get("silentShips")
                             or adata.get("silent")
-                            or (adata.get("aisSilentShips") or [])
+                            or adata.get("aisSilentShips")
+                            or []
                         )
                         if isinstance(silent_list, dict):
-                            silent_list = silent_list.get("ships") or silent_list.get("vessels") or []
+                            silent_list = silent_list.get("ships") or silent_list.get("vessels") or silent_list.get("list") or []
                         for item in (silent_list if isinstance(silent_list, list) else [])[:25]:
                             if not isinstance(item, dict):
                                 continue

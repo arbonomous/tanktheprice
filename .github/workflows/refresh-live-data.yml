@@ -2,8 +2,11 @@ name: Refresh Live HormuzFlow Data
 
 on:
   schedule:
-    # Auto-refresh every 6 hours with live yfinance oil prices + IMF PortWatch / Hormuz.now / AISStream
-    - cron: "0 */6 * * *"
+    # Every 2 hours during US market hours (Mon-Fri 13:00-21:00 UTC)
+    - cron: "0 13,15,17,19,21 * * 1-5"
+    # Every 6 hours off-hours (Mon-Fri overnight) and weekends
+    - cron: "0 1,7 * * 1-5"
+    - cron: "0 */6 * * 0,6"
   workflow_dispatch:
 
 permissions:
@@ -28,7 +31,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Fetch live maritime & crude oil feeds and compute signals
+      - name: Fetch live maritime & market feeds, run 2Y backtest, step paper ledger & alerts
         env:
           PYTHONPATH: .
           FEED_MODE: auto
@@ -38,16 +41,19 @@ jobs:
           DATALASTIC_API_KEY: ${{ secrets.DATALASTIC_API_KEY }}
           MARINETRAFFIC_API_KEY: ${{ secrets.MARINETRAFFIC_API_KEY }}
           ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python scripts/build_live_pages.py
 
-      - name: Commit & push updated live snapshot to GitHub Pages
+      - name: Commit & push updated live snapshot and paper-trading ledger
         run: |
           git config user.name "hormuzflow-bot"
           git config user.email "hormuzflow-bot@users.noreply.github.com"
-          git add docs/data/live_snapshot.json
+          git add docs/data/live_snapshot.json docs/data/paper_trades.json
           if git diff --staged --quiet; then
-            echo "No changes to live snapshot."
+            echo "No changes to live snapshot or paper ledger."
           else
-            git commit -m "chore: refresh live HormuzFlow maritime & oil data"
+            git commit -m "chore: refresh live HormuzFlow signals & paper ledger"
             git push origin main
           fi

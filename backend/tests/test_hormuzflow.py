@@ -125,3 +125,63 @@ def test_fastapi_endpoints() -> None:
         )
         assert r_stress.status_code == 200
         assert r_stress.json()["brent_delta_pct"] > 5.0
+
+
+def test_walk_forward_backtester_and_paper_trader() -> None:
+    from services.alerts import build_alert_item, format_webhook_digest
+    from services.market_feed.equities import simulate_asset_universe
+    from services.signal_engine.backtester import MAX_CONCURRENT_POSITIONS, run_walk_forward_backtest
+    from services.signal_engine.paper_trader import _new_ledger, step_paper_portfolio
+
+    sim_m = HormuzSimulator(seed=202611).generate_sync(days=365)
+    assets = simulate_asset_universe(days=260, seed=202611)
+
+    wf = run_walk_forward_backtest(
+        asset_histories=assets,
+        transits=sim_m.daily_transits,
+        live_shock_override=35.0,
+        live_flow_z_override=-1.4,
+        live_cong_z_override=1.2,
+    )
+    assert wf.starting_equity == 100_000.0
+    assert wf.slippage_bps_roundtrip == 10
+    assert wf.max_concurrent == MAX_CONCURRENT_POSITIONS
+    assert len(wf.equity_curve) > 50
+    assert len(wf.live_tickets) == 5
+    assert {t.ticker for t in wf.live_tickets} == {"BNO", "USO", "FRO", "DHT", "STNG"}
+
+    # Paper-trading step 1: opens up to 3 positions on high-conviction tickets
+    ledger = _new_ledger()
+    ledger, alerts_1 = step_paper_portfolio(
+        ledger=ledger,
+        live_tickets=wf.live_tickets,
+        supply_shock_score=35.0,
+        brent_bias="BULLISH",
+        waiting_queue_total=500,
+    )
+    assert len(ledger["open_positions"]) <= MAX_CONCURRENT_POSITIONS
+    assert ledger["equity"] > 0
+    assert len(alerts_1) >= 1
+
+    # Paper-trading step 2: simulate severe stop-out / signal exit
+    if ledger["open_positions"]:
+        first_pos = ledger["open_positions"][0]
+        # Force a stop hit on the first open ticker
+        modified_tickets = []
+        for tk in wf.live_tickets:
+            if tk.ticker == first_pos["ticker"]:
+                tk.price = round(first_pos["stop_price"] * (0.95 if first_pos["side"] == "LONG" else 1.05), 2)
+            modified_tickets.append(tk)
+        ledger, alerts_2 = step_paper_portfolio(
+            ledger=ledger,
+            live_tickets=modified_tickets,
+            supply_shock_score=-25.0,
+            brent_bias="BEARISH",
+        )
+        assert len(ledger["closed_trades"]) >= 1
+        digest = format_webhook_digest(
+            alerts_2 or [build_alert_item("OPEN", "HIGH", "Test", "Body", "BNO")],
+            {"bp": 90.0, "wp": 83.0, "shock": 30.0, "bias": "BULLISH"},
+        )
+        assert "HormuzFlow Signal Alert" in digest
+

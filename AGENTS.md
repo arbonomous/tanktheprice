@@ -12,22 +12,29 @@ tanktheprice/
 ├── .env.local                   # Local runtime configuration (gitignored)
 ├── AGENTS.md                    # This architecture & onboarding guide
 ├── scripts/
-│   └── dev.sh                   # Starts FastAPI (:8000) & Next.js (:3000) concurrently
+│   ├── dev.sh                   # Starts FastAPI (:8000) & Next.js (:3000) concurrently
+│   └── build_live_pages.py      # Generates docs/data/live_snapshot.json & docs/data/paper_trades.json
+├── docs/                        # GitHub Pages live terminal (zero-server static deployment)
+│   ├── index.html               # Standalone terminal with 20s live AIS polling, 2y backtest & paper ledger
+│   └── data/                    # Auto-refreshed live_snapshot.json & persistent paper_trades.json
 ├── data/
 │   └── hormuzflow.db            # SQLite database (auto-created on first boot/seed)
 ├── services/                    # Core Python domain packages
+│   ├── alerts.py                # Live alert feed builder + optional Discord/Telegram webhook dispatcher
 │   ├── maritime_feed/           # Adapter pattern for AIS & chokepoint transit feeds
 │   │   ├── base.py              # MaritimeAdapter ABC + VesselSnapshot / DailyTransitPoint / AisGapRecord
-│   │   ├── hormuz_now.py        # Primary free live feed (https://hormuz.now /api/traffic, /api/crossings, /data)
+│   │   ├── hormuz_now.py        # Primary free live feed (https://hormuz.now /api/snapshot, /api/daily.json, /api/portwatch, /status.json, /api/areas, /api/ports)
 │   │   ├── imf_portwatch.py     # Free IMF PortWatch ArcGIS FeatureServer baseline tanker counts
+│   │   ├── aisstream.py         # Optional free WebSocket AIS (AISStream.io)
 │   │   ├── straits_live.py      # Optional paid AIS (/api/v1/transits, /api/v1/ais-gaps, /api/v1/sanctioned-vessels)
 │   │   ├── datalastic.py        # Optional paid AIS (vessel_inradius around 26.566°N, 56.25°E, r=45 NM)
 │   │   ├── marinetraffic.py     # Optional paid AIS (ExportVessels bounding-box endpoint)
-│   │   ├── simulator.py         # Deterministic 45-day Hormuz traffic, dark-fleet & geopolitical choke simulator
+│   │   ├── simulator.py         # Deterministic Hormuz traffic, dark-fleet & geopolitical choke simulator
 │   │   └── manager.py           # Priority orchestrator + zero-key fallback + adapter health registry
-│   ├── market_feed/             # Adapter pattern for Brent (BZ=F) & WTI (CL=F) candles
+│   ├── market_feed/             # Adapter pattern for Brent (BZ=F), WTI (CL=F) & tradable ETFs/tankers
 │   │   ├── base.py              # MarketAdapter ABC + OilCandle schema
 │   │   ├── yfinance_adapter.py  # Free zero-key daily & hourly OHLCV via yfinance
+│   │   ├── equities.py          # 2-year OHLCV + ATR(14) + SMA(20) for BNO, USO, FRO, DHT, STNG, BZ=F, CL=F
 │   │   ├── alphavantage_adapter.py # Optional Alpha Vantage commodity adapter
 │   │   ├── simulator.py         # Correlated fallback candle simulator if upstream is unreachable
 │   │   └── manager.py           # Market orchestrator + adapter health
@@ -37,6 +44,8 @@ tanktheprice/
 │       ├── congestion.py        # Chokepoint Congestion & Loitering Index (speed < 3kn outside anchorages)
 │       ├── dark_fleet.py        # Dark-Fleet / AIS Gap Spike Score in 25.5°N–27.0°N, 55.8°E–57.0°E
 │       ├── predictor.py         # Composite Supply Shock Score (-100..+100), GBR + Z-score predictor, backtester
+│       ├── backtester.py        # Zero-lookahead 2-year walk-forward trade-level backtester (10 bps RT slippage) + live 5-ticker tickets
+│       ├── paper_trader.py      # Persistent $100k Balanced Swing Desk automated paper-trading ledger
 │       └── stress_test.py       # Interactive VLCC drop & AIS spoofing price-impact elasticity simulator
 ├── backend/                     # FastAPI + SQLAlchemy + APScheduler
 │   ├── main.py                  # FastAPI entrypoint, CORS, lifespan startup & APScheduler hooks
@@ -105,7 +114,7 @@ HormuzFlow works out of the box with zero API keys (`FEED_MODE=auto` pulls live 
 
 To upgrade to high-resolution commercial AIS or Alpha Vantage oil data:
 
-1. Open `.env.local` (copied from `.env.example`) — or add Repository Secrets in GitHub Settings → Secrets and variables → Actions for the automated 6-hour GitHub Pages refresh workflow (`.github/workflows/refresh-live-data.yml`):
+1. Open `.env.local` (copied from `.env.example`) — or add Repository Secrets in GitHub Settings → Secrets and variables → Actions for the automated GitHub Pages refresh workflow (`.github/workflows/refresh-live-data.yml`, running every 2 hours during US market hours Mon–Fri 13:00–21:00 UTC and every 6 hours off-hours/weekends):
    ```env
    FEED_MODE=auto
    AISSTREAM_API_KEY=your_free_aisstream_io_key
@@ -113,6 +122,9 @@ To upgrade to high-resolution commercial AIS or Alpha Vantage oil data:
    DATALASTIC_API_KEY=your_datalastic_key
    MARINETRAFFIC_API_KEY=your_marinetraffic_key
    ALPHAVANTAGE_API_KEY=your_alphavantage_key
+   DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+   TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+   TELEGRAM_CHAT_ID=your_telegram_chat_id
    ```
 2. Restart the FastAPI server or click **REFRESH** in the top-right KPI bar (or manually run the **Refresh Live HormuzFlow Data** GitHub Action).
 3. Click **FEEDS** in the header to verify each adapter flips from `STANDBY NO KEY` to `LIVE`:

@@ -152,50 +152,80 @@
       </div>
     </section>
 
-    <!-- ROW 2.5: HOW TO TRADE THIS SIGNAL — EXECUTION PLAYBOOK & RISK CALCULATOR -->
+    <!-- ROW 2.5: LIVE SWING SIGNAL TICKETS, ALERT FEED & EXECUTION DESK -->
     <section id="trading-playbook-panel" class="panel rounded-lg overflow-hidden">
       <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 border-b border-slate-800 bg-[#0D1321]/80">
         <div class="flex flex-wrap items-center gap-2">
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-100">How to Trade This Signal — Execution Playbook &amp; Risk Desk</h2>
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-100">Live Swing Signal Tickets &amp; Execution Desk (BNO · USO · FRO · DHT · STNG)</h2>
           <span id="trade-regime-badge" class="text-[11px] mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/35">BULLISH CHOKE BIAS</span>
         </div>
-        <span class="text-[11px] mono text-slate-500">EDUCATIONAL SIGNAL FRAMEWORK · NOT FINANCIAL ADVICE</span>
+        <span class="text-[11px] mono text-slate-500">BALANCED SWING DESK · 1–5D HORIZON · NOT FINANCIAL ADVICE</span>
       </div>
 
       <div class="p-4 space-y-4">
+        <!-- Rich Live Chokepoint Context Strip (Waiting Queues, Gulf Exports, AIS-Silent) -->
+        <div id="chokepoint-context-strip" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+
         <!-- Live Actionable Signal Synthesis -->
         <div id="trade-live-banner" class="rounded-lg border border-slate-800 bg-[#0B0F19] p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 items-center"></div>
 
-        <!-- Two-column: Tradable Instruments Matrix + Interactive Position Sizing Calculator -->
+        <!-- Live Per-Ticker Swing Signal Tickets (Real yfinance BNO/USO/FRO/DHT/STNG Prices & ATR Stops) -->
+        <div class="rounded-lg border border-slate-800 bg-[#0B0F19] overflow-x-auto">
+          <div class="px-3.5 py-2 border-b border-slate-800 bg-[#0D1321] flex flex-wrap items-center justify-between gap-2">
+            <span class="text-[11px] mono uppercase tracking-wider text-slate-300">Live Entry / Target / Stop Tickets (1.5×ATR Stop · 2.8×ATR Target · 1.5% Risk)</span>
+            <span class="text-[11px] mono text-slate-500">CLICK "+ LOG PAPER" TO TRACK IN YOUR PERSONAL JOURNAL</span>
+          </div>
+          <table class="w-full text-left border-collapse">
+            <thead class="bg-[#0D1321]/70 text-[10px] mono uppercase text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="py-2 px-3">Ticker</th>
+                <th class="py-2 px-3">Live Price</th>
+                <th class="py-2 px-3">Stance</th>
+                <th class="py-2 px-3">Conviction</th>
+                <th class="py-2 px-3">ATR(14)</th>
+                <th class="py-2 px-3">Stop / Target</th>
+                <th class="py-2 px-3">Size ($100k)</th>
+                <th class="py-2 px-3">Signal Rationale</th>
+                <th class="py-2 px-3 text-right">Journal</th>
+              </tr>
+            </thead>
+            <tbody id="live-tickets-tbody" class="divide-y divide-slate-800/70 text-xs"></tbody>
+          </table>
+        </div>
+
+        <!-- Two-column: In-App Live Alert Feed + Interactive Position Sizing Calculator -->
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
-          <!-- Instruments & Tickers -->
-          <div class="xl:col-span-7 rounded-lg border border-slate-800 bg-[#0B0F19] overflow-hidden">
-            <div class="px-3.5 py-2 border-b border-slate-800 bg-[#0D1321] flex items-center justify-between">
-              <span class="text-[11px] mono uppercase tracking-wider text-slate-300">Tradable Vehicles Mapped to Hormuz Signals</span>
-              <span class="text-[11px] mono text-slate-500">ETFs · FUTURES · TANKER EQUITIES</span>
+          <!-- In-App Alert Feed -->
+          <div class="xl:col-span-7 rounded-lg border border-slate-800 bg-[#0B0F19] overflow-hidden flex flex-col">
+            <div class="px-3.5 py-2 border-b border-slate-800 bg-[#0D1321] flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[11px] mono uppercase tracking-wider text-slate-300">Live Trade &amp; Regime Alert Feed</span>
+              <span id="webhook-status-pill" class="text-[10px] mono text-slate-400">DISCORD / TELEGRAM READY VIA GITHUB SECRETS</span>
             </div>
-            <div id="trade-vehicles-list" class="divide-y divide-slate-800/70"></div>
+            <div id="alert-feed-list" class="divide-y divide-slate-800/70 max-h-[250px] overflow-y-auto"></div>
           </div>
 
           <!-- Interactive Position Sizing & Risk Calculator -->
           <div class="xl:col-span-5 rounded-lg border border-slate-800 bg-[#0B0F19] p-4 flex flex-col justify-between gap-3">
             <div>
               <div class="flex items-center justify-between mb-3">
-                <span class="text-[11px] mono uppercase tracking-wider text-slate-300">Live Position Sizing &amp; Risk Calculator</span>
-                <span id="calc-horizon-pill" class="text-[10px] mono px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">24H–72H SWING</span>
+                <span class="text-[11px] mono uppercase tracking-wider text-slate-300">Custom Position Sizing Calculator</span>
+                <span id="calc-horizon-pill" class="text-[10px] mono px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">1–5D SWING</span>
               </div>
               <div class="grid grid-cols-3 gap-2 text-xs mono mb-3">
                 <div>
-                  <label for="calc-instrument" class="block text-[10px] text-slate-400 mb-1">INSTRUMENT</label>
+                  <label for="calc-instrument" class="block text-[10px] text-slate-400 mb-1">TICKER</label>
                   <select id="calc-instrument" class="w-full rounded bg-[#101726] border border-slate-700 px-2 py-1.5 text-slate-100 text-xs outline-none">
                     <option value="BNO">BNO (Brent ETF)</option>
                     <option value="USO">USO (WTI ETF)</option>
+                    <option value="FRO">FRO (Frontline)</option>
+                    <option value="DHT">DHT (VLCC)</option>
+                    <option value="STNG">STNG (Scorpio)</option>
                     <option value="BZ=F">BZ=F (Brent Fut)</option>
                   </select>
                 </div>
                 <div>
                   <label for="calc-capital" class="block text-[10px] text-slate-400 mb-1">ACCOUNT ($)</label>
-                  <input id="calc-capital" type="number" min="500" step="500" value="25000" class="w-full rounded bg-[#101726] border border-slate-700 px-2 py-1.5 text-slate-100 text-xs outline-none" />
+                  <input id="calc-capital" type="number" min="500" step="500" value="100000" class="w-full rounded bg-[#101726] border border-slate-700 px-2 py-1.5 text-slate-100 text-xs outline-none" />
                 </div>
                 <div>
                   <label for="calc-risk" class="block text-[10px] text-slate-400 mb-1">MAX RISK (%)</label>
@@ -221,6 +251,72 @@
               </tr>
             </thead>
             <tbody id="trade-regime-table" class="divide-y divide-slate-800/70 text-xs"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROW 2.6: 2-YEAR WALK-FORWARD TRADE BACKTESTER -->
+    <section id="walk-forward-panel" class="panel rounded-lg overflow-hidden">
+      <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 border-b border-slate-800 bg-[#0D1321]/80">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-100">2-Year Multi-Regime Walk-Forward Backtest (Zero Lookahead · 10 bps Slippage)</h2>
+          <span id="wf-window-badge" class="text-[11px] mono px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">2Y OOS</span>
+        </div>
+        <div class="inline-flex rounded bg-[#0B0F19] p-0.5 border border-slate-800 text-[11px] mono">
+          <button id="wf-tab-tickers" class="px-2.5 py-1 rounded bg-[#1B2840] text-slate-100 cursor-pointer">BY TICKER</button>
+          <button id="wf-tab-trades" class="px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 cursor-pointer">CLOSED TRADES (25)</button>
+        </div>
+      </div>
+
+      <div class="p-4 space-y-4">
+        <div id="wf-kpi-strip" class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-7 gap-2"></div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
+          <!-- 2Y Equity Curve SVG -->
+          <div class="xl:col-span-7 rounded-lg border border-slate-800 bg-[#0B0F19] p-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] mono text-slate-400 mb-2">
+              <span>2-YEAR WALK-FORWARD EQUITY CURVE ($100k START)</span>
+              <div class="flex items-center gap-3">
+                <span class="text-emerald-400">━ HormuzFlow Strategy</span>
+                <span class="text-sky-400">┄ BNO Buy &amp; Hold</span>
+              </div>
+            </div>
+            <svg id="wf-equity-svg" class="w-full h-[225px] block" viewBox="0 0 700 225" preserveAspectRatio="none"></svg>
+            <div id="wf-hover-readout" class="mt-1.5 text-[11px] mono text-slate-400 text-right">Hover curve for equity &amp; drawdown details</div>
+          </div>
+
+          <!-- Per-Ticker Stats or Recent Closed Trades -->
+          <div class="xl:col-span-5 rounded-lg border border-slate-800 bg-[#0B0F19] overflow-x-auto max-h-[290px] overflow-y-auto">
+            <table class="w-full text-left border-collapse">
+              <thead id="wf-table-head" class="sticky top-0 bg-[#0D1321] text-[10px] mono uppercase text-slate-400 border-b border-slate-800"></thead>
+              <tbody id="wf-table-body" class="divide-y divide-slate-800/70 text-xs"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROW 2.7: AUTOMATED $100K PAPER-TRADING LEDGER & MANUAL JOURNAL -->
+    <section id="paper-ledger-panel" class="panel rounded-lg overflow-hidden">
+      <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 border-b border-slate-800 bg-[#0D1321]/80">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-100">Automated $100k Paper-Trading Ledger (Persisted in GitHub)</h2>
+          <span id="paper-sync-badge" class="text-[11px] mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">BALANCED SWING DESK</span>
+        </div>
+        <div class="inline-flex rounded bg-[#0B0F19] p-0.5 border border-slate-800 text-[11px] mono">
+          <button id="pt-tab-open" class="px-2.5 py-1 rounded bg-[#1B2840] text-slate-100 cursor-pointer">OPEN POSITIONS</button>
+          <button id="pt-tab-closed" class="px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 cursor-pointer">CLOSED TRADES</button>
+          <button id="pt-tab-manual" class="px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 cursor-pointer">MY MANUAL JOURNAL</button>
+        </div>
+      </div>
+
+      <div class="p-4 space-y-3">
+        <div id="paper-kpi-strip" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2"></div>
+        <div class="rounded-lg border border-slate-800 bg-[#0B0F19] overflow-x-auto max-h-[260px] overflow-y-auto">
+          <table class="w-full text-left border-collapse">
+            <thead id="paper-table-head" class="sticky top-0 bg-[#0D1321] text-[10px] mono uppercase text-slate-400 border-b border-slate-800"></thead>
+            <tbody id="paper-table-body" class="divide-y divide-slate-800/70 text-xs"></tbody>
           </table>
         </div>
       </div>
@@ -441,7 +537,7 @@ const state = {
   vlcc: 30, ais: 2.0, cong: 25, dur: 5,
   motionPlaying: true, motionScale: 60, // 60x visible flow glide or 1x true nautical speed
   lastLivePollTs: 0, livePollCount: 0,
-  calcInstrument: "BNO", calcCapital: 25000, calcRiskPct: 1.5
+  calcInstrument: "BNO", calcCapital: 100000, calcRiskPct: 1.5
 };
 
 const fmtSigned = (v, d=2, suf="") => (v > 0 ? "+" : "") + v.toFixed(d) + suf;
@@ -1195,9 +1291,83 @@ function renderAnomalyLog() {
   });
 }
 
+let wfTab = "tickers";
+let paperTab = "open";
+const MANUAL_KEY = "hormuzflow_manual_paper_trades_v1";
+
+function loadManualTrades() {
+  try { return JSON.parse(localStorage.getItem(MANUAL_KEY) || "[]"); } catch { return []; }
+}
+function saveManualTrades(list) {
+  try { localStorage.setItem(MANUAL_KEY, JSON.stringify(list)); } catch {}
+}
+
+function logManualPaperTrade(ticker) {
+  const wf = DATA.walk_forward;
+  const tk = (wf && wf.live_tickets || []).find(t => t.ticker === ticker);
+  if (!tk) return;
+  const side = tk.stance === "SHORT" ? "SHORT" : "LONG";
+  const list = loadManualTrades();
+  list.unshift({
+    id: Date.now(),
+    ticker: tk.ticker,
+    side,
+    opened_at: new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC",
+    entry_price: tk.price,
+    stop_price: tk.stop_price,
+    target_price: tk.target_price,
+    shares: tk.suggested_shares,
+    status: "OPEN",
+    exit_price: null
+  });
+  saveManualTrades(list);
+  paperTab = "manual";
+  updatePaperTabButtons();
+  renderPaperLedger();
+  document.getElementById("paper-ledger-panel").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function closeManualPaperTrade(id) {
+  const list = loadManualTrades();
+  const wf = DATA.walk_forward;
+  const tMap = new Map((wf && wf.live_tickets || []).map(t => [t.ticker, t]));
+  const item = list.find(x => x.id === id);
+  if (!item) return;
+  const cur = tMap.get(item.ticker)?.price ?? item.entry_price;
+  item.status = "CLOSED";
+  item.exit_price = cur;
+  item.closed_at = new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC";
+  saveManualTrades(list);
+  renderPaperLedger();
+}
+
 function renderTradingPlaybook() {
   const s = DATA.s;
+  const ctx = DATA.context || {};
+  const wf = DATA.walk_forward;
   const spread = s.bp - s.wp;
+
+  // Chokepoint rich context strip
+  const qTotal = (ctx.waiting_gulf || 0) + (ctx.waiting_oman || 0);
+  document.getElementById("chokepoint-context-strip").innerHTML = `
+    <div class="rounded border border-slate-800 bg-[#0B0F19] px-3 py-2 mono">
+      <div class="text-[10px] text-slate-400">WAITING QUEUE (GULF / OMAN)</div>
+      <div class="mt-0.5 text-sm font-bold text-amber-300">${qTotal > 0 ? qTotal : s.loit} <span class="text-[11px] font-normal text-slate-400">${qTotal > 0 ? `(${ctx.waiting_gulf} / ${ctx.waiting_oman})` : "in strait"}</span></div>
+    </div>
+    <div class="rounded border border-slate-800 bg-[#0B0F19] px-3 py-2 mono">
+      <div class="text-[10px] text-slate-400">GULF PORT EXPORTS VS NORMAL</div>
+      <div class="mt-0.5 text-sm font-bold ${(ctx.gulf_export_pct_normal ?? 100) < 70 ? 'text-red-400' : 'text-emerald-300'}">${(ctx.gulf_export_pct_normal ?? 100).toFixed(1)}%</div>
+    </div>
+    <div class="rounded border border-slate-800 bg-[#0B0F19] px-3 py-2 mono">
+      <div class="text-[10px] text-slate-400">STRAIT STATUS VS BASELINE</div>
+      <div class="mt-0.5 text-sm font-bold text-sky-300">${String(ctx.status_level || "LIVE").toUpperCase()} ${ctx.status_pct_normal != null ? `(${ctx.status_pct_normal}%)` : ""}</div>
+    </div>
+    <div class="rounded border border-slate-800 bg-[#0B0F19] px-3 py-2 mono">
+      <div class="text-[10px] text-slate-400">2Y HISTORY DEPTH</div>
+      <div class="mt-0.5 text-sm font-bold text-slate-100">${DATA.meta?.history_days || 500}d <span class="text-[10px] font-normal text-slate-400">${String(DATA.meta?.history_source || "portwatch").toUpperCase()}</span></div>
+    </div>
+  `;
+
   const isBull = s.shock >= 20 || s.bias === "BULLISH";
   const isBear = s.shock <= -15 || s.bias === "BEARISH";
   const regime = isBull ? "BULLISH CHOKE BIAS" : isBear ? "BEARISH FLOW RECOVERY" : "NEUTRAL / RANGE WATCH";
@@ -1211,22 +1381,20 @@ function renderTradingPlaybook() {
   badge.className = "text-[11px] mono px-2 py-0.5 rounded border " + badgeCls;
 
   const actionHeadline = isBull
-    ? "LONG BRENT (BNO / BZ=F) · LONG BRENT–WTI SPREAD · LONG VLCC TANKERS"
+    ? "LONG BRENT (BNO) · LONG VLCC TANKERS (FRO / DHT / STNG) · LONG BRENT–WTI SPREAD"
     : isBear
-      ? "FADE CRUDE SPIKES · SHORT BRENT–WTI SPREAD · REDUCE TANKER BETA"
-      : "WAIT FOR BREAKOUT ABOVE +25 SHOCK OR FLOW DROP < -15% BEFORE DEPLOYING";
+      ? "FADE CRUDE SPIKES · SHORT BNO / USO · REDUCE TANKER BETA"
+      : "WAIT FOR HIGH-CONVICTION BREAKOUT (SHOCK ≥ +22) OR FLOW DROP < -12%";
 
   const rationale = isBull
-    ? `Live Supply Shock is ${fmtSigned(s.shock,1)} with 7d outbound flow ${fmtSigned(s.fd7,1,"%")} vs. 30d baseline and Congestion at ${s.cong.toFixed(0)}/100 (${s.loit} tankers queued). Historically, Strait bottlenecks impact seaborne Brent faster than inland WTI over a 24h–72h lag (model 72h target: ${fmtSigned(s.p72b,2,"%")}, OOS hit rate ${s.acc.toFixed(1)}%).`
+    ? `Supply Shock is ${fmtSigned(s.shock,1)} with 7d outbound flow ${fmtSigned(s.fd7,1,"%")} vs. 30d baseline and Congestion at ${s.cong.toFixed(0)}/100. Balanced Swing Desk sizes each qualifying ticket at 1.5% account risk with 1.5×ATR stop, 2.8×ATR target, and 5-day time stop.`
     : isBear
-      ? `Supply Shock (${fmtSigned(s.shock,1)}) signals easing chokepoint pressure and normalizing outbound tanker transits. Geopolitical war-risk premia in Brent typically compress faster than WTI as normal VLCC throughput resumes.`
-      : `Signals are mixed (Supply Shock ${fmtSigned(s.shock,1)}, Flow Delta ${fmtSigned(s.fd7,1,"%")}). Keep powder dry or express smaller mean-reversion trades until congestion spikes above 75/100 or outbound flow drops past -15%.`;
+      ? `Supply Shock (${fmtSigned(s.shock,1)}) signals easing chokepoint pressure and normalizing outbound tanker transits. War-risk premia in BNO typically compress faster than USO.`
+      : `Signals are mixed (Supply Shock ${fmtSigned(s.shock,1)}, Flow Delta ${fmtSigned(s.fd7,1,"%")}). Wait for trend + maritime confirmation before allocating new risk.`;
 
   const invalidation = isBull
-    ? `Exit / abort if 7d Outbound Flow recovers above 0% vs. 30d baseline, Congestion drops below 45/100, or Brent closes > 2.5% below entry ($${(s.bp * 0.975).toFixed(2)}).`
-    : isBear
-      ? `Exit / abort if Supply Shock reverses above +20, AIS-dark corridor incidents spike, or Brent breaks > 2.5% above entry ($${(s.bp * 1.025).toFixed(2)}).`
-      : `Trigger long entry only on Supply Shock ≥ +25 with 7d Flow Delta ≤ -12%.`;
+    ? `Abort longs if 7d Outbound Flow recovers above 0% vs. 30d baseline, Supply Shock drops ≤ -18, or ticker hits its 1.5×ATR hard stop.`
+    : `Abort shorts if Supply Shock reverses ≥ +20, waiting queues surge past 450 ships, or ticker hits its 1.5×ATR hard stop.`;
 
   document.getElementById("trade-live-banner").innerHTML = `
     <div class="lg:col-span-8 space-y-1.5">
@@ -1236,92 +1404,120 @@ function renderTradingPlaybook() {
     </div>
     <div class="lg:col-span-4 rounded border border-slate-800 bg-[#101726] p-3 mono space-y-1.5 text-xs">
       <div class="flex justify-between"><span class="text-slate-400">BRENT–WTI SPREAD</span><span class="text-sky-300 font-semibold">$${spread.toFixed(2)} / bbl</span></div>
-      <div class="flex justify-between"><span class="text-slate-400">PEAK LAG WINDOW</span><span class="text-slate-100">24h – 72h</span></div>
-      <div class="flex justify-between"><span class="text-slate-400">OOS HIT RATE</span><span class="text-emerald-400 font-semibold">${s.acc.toFixed(1)}%</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">2Y WALK-FWD SHARPE</span><span class="text-emerald-400 font-semibold">${wf ? wf.sharpe_ratio.toFixed(2) : "—"}</span></div>
+      <div class="flex justify-between"><span class="text-slate-400">2Y WIN RATE / PF</span><span class="text-slate-100">${wf ? `${wf.win_rate_pct.toFixed(1)}% · ${wf.profit_factor.toFixed(2)}x` : "—"}</span></div>
       <div class="pt-1 border-t border-slate-800 text-[11px] text-amber-300/90 leading-snug"><strong class="text-amber-400">INVALIDATION:</strong> ${invalidation}</div>
     </div>
   `;
 
-  const vehicles = [
-    {
-      name: "Direct Seaborne Crude",
-      tickers: "BNO (ETF) · BZ=F (Futures)",
-      bias: isBull ? "LONG" : isBear ? "SHORT / HEDGE" : "WATCH",
-      tone: isBull ? "emerald" : isBear ? "red" : "amber",
-      why: "Highest direct beta to Strait of Hormuz flows (~20% of global petroleum liquids). Use BNO for brokerage accounts or ICE Brent futures for capital efficiency."
-    },
-    {
-      name: "Brent–WTI Spread Pair Trade",
-      tickers: "Long BNO / Short USO · BZ–CL",
-      bias: isBull ? "WIDENER (LONG BZ / SHORT CL)" : isBear ? "NARROWER" : "NEUTRAL",
-      tone: isBull ? "sky" : isBear ? "amber" : "neutral",
-      why: `Isolates Middle East chokepoint risk from broad U.S./global macro oil demand. Current spread is $${spread.toFixed(2)}/bbl; Hormuz supply squeezes typically push Brent further above WTI.`
-    },
-    {
-      name: "VLCC & Product Tanker Equities",
-      tickers: "FRO · DHT · STNG · INSW",
-      bias: isBull ? "LONG FREIGHT CONVEXITY" : "NEUTRAL",
-      tone: isBull ? "emerald" : "neutral",
-      why: `When Congestion exceeds 70/100 (currently ${s.cong.toFixed(0)}/100) and tankers loiter off Fujairah/Oman, effective vessel supply shrinks and TD3C VLCC dayrates surge.`
-    },
-    {
-      name: "Tail-Risk Options Overlay",
-      tickers: "BNO / USO 30–45 DTE Call Spreads",
-      bias: s.shock >= 35 ? "ACTIVE TAIL HEDGE" : "STANDBY (SHOCK ≥ +40)",
-      tone: s.shock >= 35 ? "amber" : "neutral",
-      why: "If the Stress-Test Simulator indicates >10% Brent upside on a 30–50% VLCC drop, defined-risk OTM call spreads capture nonlinear crisis spikes without overnight gap stop-out risk."
-    }
-  ];
+  // Live Swing Signal Tickets Table (BNO, USO, FRO, DHT, STNG)
+  const tickets = (wf && wf.live_tickets) || [];
+  document.getElementById("live-tickets-tbody").innerHTML = tickets.length
+    ? tickets.map(tk => {
+        const stCls = tk.stance === "LONG"
+          ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/35"
+          : tk.stance === "SHORT"
+            ? "bg-red-500/15 text-red-300 border-red-500/35"
+            : "bg-slate-800 text-slate-300 border-slate-700";
+        const barCol = tk.conviction >= 65 ? "bg-emerald-400" : tk.conviction >= 45 ? "bg-amber-400" : "bg-slate-500";
+        return `
+          <tr class="hover:bg-[#101726]/70 mono">
+            <td class="py-2.5 px-3">
+              <div class="font-bold text-slate-100">${tk.ticker} <span class="text-[10px] font-normal text-sky-400">${tk.asset_type}</span></div>
+              <div class="text-[10px] text-slate-500">${tk.name}</div>
+            </td>
+            <td class="py-2.5 px-3">
+              <div class="font-semibold text-slate-100">$${tk.price.toFixed(2)}</div>
+              <div class="text-[10px] ${tk.change_1d_pct>=0?'text-emerald-400':'text-red-400'}">${fmtSigned(tk.change_1d_pct,2,"%")}</div>
+            </td>
+            <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded border text-[10px] font-semibold ${stCls}">${tk.stance}</span></td>
+            <td class="py-2.5 px-3 min-w-[95px]">
+              <div class="text-[11px] text-slate-200">${tk.conviction.toFixed(0)} / 100</div>
+              <div class="h-1.5 w-full rounded bg-slate-800 mt-1 overflow-hidden"><div class="h-full ${barCol}" style="width:${Math.min(100,tk.conviction)}%"></div></div>
+            </td>
+            <td class="py-2.5 px-3 text-slate-300">$${tk.atr_14.toFixed(2)}<div class="text-[10px] text-slate-500">${tk.atr_pct.toFixed(1)}%</div></td>
+            <td class="py-2.5 px-3">
+              <div class="text-red-400 text-[11px]">S: $${tk.stop_price.toFixed(2)}</div>
+              <div class="text-emerald-400 text-[11px]">T: $${tk.target_price.toFixed(2)} (${tk.reward_risk.toFixed(1)}R)</div>
+            </td>
+            <td class="py-2.5 px-3">
+              <div class="text-sky-300">${tk.suggested_shares} sh</div>
+              <div class="text-[10px] text-slate-500">$${Math.round(tk.suggested_notional).toLocaleString()}</div>
+            </td>
+            <td class="py-2.5 px-3 font-sans text-[11px] text-slate-400 max-w-xs">${tk.rationale}</td>
+            <td class="py-2.5 px-3 text-right">
+              <button data-log-tkr="${tk.ticker}" class="log-manual-btn px-2 py-1 rounded bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/35 text-[10px] cursor-pointer">+ LOG PAPER</button>
+            </td>
+          </tr>`;
+      }).join("")
+    : `<tr><td colspan="9" class="py-6 text-center text-xs mono text-slate-500">Loading live BNO, USO, FRO, DHT, STNG tickets…</td></tr>`;
 
-  const badgeTone = t => t === "emerald" ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-    : t === "sky" ? "bg-sky-500/15 text-sky-300 border-sky-500/30"
-    : t === "amber" ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
-    : t === "red" ? "bg-red-500/15 text-red-300 border-red-500/35"
-    : "bg-slate-800 text-slate-300 border-slate-700";
+  document.querySelectorAll(".log-manual-btn").forEach(btn => {
+    btn.onclick = () => logManualPaperTrade(btn.dataset.logTkr);
+  });
 
-  document.getElementById("trade-vehicles-list").innerHTML = vehicles.map(v => `
-    <div class="px-3.5 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-[#101726]/70">
-      <div class="space-y-0.5 max-w-xl">
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="text-xs font-semibold text-slate-100">${v.name}</span>
-          <span class="text-[11px] mono text-sky-300">${v.tickers}</span>
-        </div>
-        <p class="text-[11px] text-slate-400 leading-relaxed">${v.why}</p>
-      </div>
-      <span class="shrink-0 self-start sm:self-center text-[10px] mono px-2 py-0.5 rounded border ${badgeTone(v.tone)}">${v.bias}</span>
-    </div>
-  `).join("");
+  // In-App Live Alert Feed
+  const ledger = DATA.paper_ledger || {};
+  const alerts = ledger.alerts || [];
+  const wh = DATA.meta?.alert_delivery || {};
+  const whText = [
+    `DISCORD: ${wh.discord || "STANDBY"}`,
+    `TELEGRAM: ${wh.telegram || "STANDBY"}`
+  ].join(" · ");
+  document.getElementById("webhook-status-pill").textContent = whText;
 
+  document.getElementById("alert-feed-list").innerHTML = alerts.length
+    ? alerts.slice(0, 14).map(a => {
+        const tone = a.severity === "CRITICAL"
+          ? "bg-red-500/15 text-red-300 border-red-500/35"
+          : a.severity === "HIGH"
+            ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+            : "bg-sky-500/15 text-sky-300 border-sky-500/30";
+        return `
+          <div class="px-3.5 py-2.5 flex items-start justify-between gap-3 hover:bg-[#101726]/60">
+            <div class="space-y-0.5">
+              <div class="flex flex-wrap items-center gap-1.5 mono">
+                <span class="px-1.5 py-0.5 rounded border text-[9px] font-semibold ${tone}">${a.kind}</span>
+                ${a.ticker ? `<span class="text-xs font-bold text-sky-300">${a.ticker}</span>` : ""}
+                <span class="text-xs font-semibold text-slate-100">${a.title}</span>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-relaxed">${a.message}</p>
+            </div>
+            <span class="text-[10px] mono text-slate-500 shrink-0">${a.timestamp}</span>
+          </div>`;
+      }).join("")
+    : `<div class="p-4 text-xs mono text-slate-500">No alerts yet — high-conviction entries, target hits, stop-outs, and regime flips appear here automatically.</div>`;
+
+  // 3-Regime Decision Matrix
   const regimes = [
     {
-      active: s.shock >= 25,
+      active: s.shock >= 22,
       name: "Choke Breakout (Bullish)",
       tone: "text-emerald-400",
-      trigger: "Supply Shock ≥ +25 AND 7d Flow Delta ≤ -10%",
-      expr: "Long BNO / BZ=F + Long Brent–WTI Spread; add FRO/DHT if Congestion > 75",
-      confirm: "Loitering queue rising off Fujairah/Musandam + amber divergence zone active",
-      exit: "Take 50% at 72h target, trail stop at -2.5% or when outbound flow returns to 30d avg"
+      trigger: "Supply Shock ≥ +22 AND 7d Flow Delta ≤ -10%",
+      expr: "Long BNO + VLCC Tankers (FRO / DHT / STNG); 1.5×ATR stop, 2.8×ATR target",
+      confirm: "Waiting queues rising off Oman/Gulf + above 20d SMA trend confirmation",
+      exit: "Target hit, 5-day time stop, -1.5×ATR hard stop, or Supply Shock ≤ -18"
     },
     {
-      active: s.shock > -15 && s.shock < 25,
+      active: s.shock > -15 && s.shock < 22,
       name: "Balanced / Watchlist",
       tone: "text-amber-300",
-      trigger: "Supply Shock between -15 and +25",
-      expr: "Stay flat or half-size relative-value spread only",
-      confirm: "Watch Radar for sudden dark-fleet corridor spike or TSS speed drop < 9 kn",
-      exit: "Avoid overtrading noise; wait for ±20σ flow or congestion confirmation"
+      trigger: "Supply Shock between -15 and +22",
+      expr: "Stay selective — hold existing winners or trade only Conviction ≥ 56 setups",
+      confirm: "Monitor Radar for Fujairah queue surge or sudden AIS-dark spike",
+      exit: "Avoid overtrading choppy ranges; protect capital for asymmetric chokes"
     },
     {
       active: s.shock <= -15,
       name: "Flow Normalization (Bearish)",
       tone: "text-red-400",
-      trigger: "Supply Shock ≤ -15 AND 7d Flow Delta ≥ +10%",
-      expr: "Fade geopolitical Brent spikes (Short BNO / Put Spreads / Short Brent–WTI)",
-      confirm: "Outbound VLCC pace accelerating, Fujairah queue clearing, speed > 12 kn",
-      exit: "Stop out on +2.5% Brent breakout or renewed AIS blackout surge"
+      trigger: "Supply Shock ≤ -15 AND below 20d SMA",
+      expr: "Short BNO / USO to capture war-risk premium compression",
+      confirm: "Outbound VLCC crossings accelerating back toward pre-crisis baseline",
+      exit: "1.5×ATR hard stop, 5-day time stop, or renewed Supply Shock ≥ +20"
     }
   ];
-
   document.getElementById("trade-regime-table").innerHTML = regimes.map(r => `
     <tr class="${r.active ? 'bg-sky-500/10' : 'hover:bg-[#101726]/60'}">
       <td class="py-2.5 px-3 font-mono font-semibold ${r.tone} whitespace-nowrap">${r.active ? '▶ ' : ''}${r.name}</td>
@@ -1338,48 +1534,233 @@ function renderTradingPlaybook() {
 function renderRiskCalc() {
   const s = DATA.s;
   const inst = state.calcInstrument;
-  const capital = Math.max(100, Number(state.calcCapital) || 25000);
+  const capital = Math.max(100, Number(state.calcCapital) || 100000);
   const riskPct = Math.max(0.1, Math.min(10, Number(state.calcRiskPct) || 1.5));
-  const isBear = s.shock <= -15 || s.bias === "BEARISH";
-  const dir = s.shock >= 15 || s.bias === "BULLISH" ? "LONG" : isBear ? "SHORT" : "WATCH / 0.5x LONG";
+  const tickets = (DATA.walk_forward && DATA.walk_forward.live_tickets) || [];
+  const tk = tickets.find(t => t.ticker === inst);
 
-  // Approximate ETF/futures reference price from live Brent/WTI quotes
-  const spotPrice = inst === "BZ=F" ? s.bp : inst === "BNO" ? Number((s.bp * 0.375).toFixed(2)) : Number((s.wp * 0.94).toFixed(2));
-  const stopPct = 2.5;
-  const targetPct = Math.max(2.0, Math.min(12.0, Math.abs(s.p72b) * 2.2 + (s.shock >= 25 ? 2.0 : 1.0)));
+  const spotPrice = tk ? tk.price : (inst === "BZ=F" ? s.bp : Number((s.bp * 0.375).toFixed(2)));
+  const atr = tk ? tk.atr_14 : Number((spotPrice * 0.022).toFixed(2));
+  const dir = tk ? tk.stance : (s.shock >= 20 ? "LONG" : s.shock <= -15 ? "SHORT" : "WATCH");
+  const stopDist = 1.5 * atr;
+  const targetDist = 2.8 * atr;
+  const stopPct = (stopDist / Math.max(spotPrice, 0.01)) * 100;
+  const targetPct = (targetDist / Math.max(spotPrice, 0.01)) * 100;
+
   const maxRiskUsd = capital * (riskPct / 100);
-  const rawNotional = maxRiskUsd / (stopPct / 100);
-  const cappedNotional = Math.min(capital * (dir.includes("0.5x") ? 0.5 : 1.0), rawNotional);
+  const rawNotional = (maxRiskUsd / Math.max(stopDist, 0.01)) * spotPrice;
+  const cappedNotional = Math.min(capital * 0.33, rawNotional);
   const units = inst === "BZ=F" ? Math.max(1, Math.floor(cappedNotional / (spotPrice * 100))) : Math.max(1, Math.floor(cappedNotional / spotPrice));
   const unitLbl = inst === "BZ=F" ? "micro-lots (100 bbl)" : "shares";
-  const stopPrice = dir.startsWith("SHORT") ? spotPrice * (1 + stopPct / 100) : spotPrice * (1 - stopPct / 100);
-  const targetPrice = dir.startsWith("SHORT") ? spotPrice * (1 - targetPct / 100) : spotPrice * (1 + targetPct / 100);
-  const rr = (targetPct / stopPct).toFixed(2);
+  const stopPrice = dir === "SHORT" ? spotPrice + stopDist : Math.max(0.5, spotPrice - stopDist);
+  const targetPrice = dir === "SHORT" ? Math.max(0.5, spotPrice - targetDist) : spotPrice + targetDist;
 
   document.getElementById("calc-output").innerHTML = `
     <div class="rounded border border-slate-800 bg-[#101726] p-2.5 mono">
       <div class="text-[10px] text-slate-400">STANCE &amp; MAX RISK</div>
-      <div class="mt-0.5 text-sm font-bold ${dir.includes('LONG')?'text-emerald-300':dir.includes('SHORT')?'text-red-300':'text-amber-300'}">${dir}</div>
+      <div class="mt-0.5 text-sm font-bold ${dir==='LONG'?'text-emerald-300':dir==='SHORT'?'text-red-300':'text-amber-300'}">${dir} ${inst}</div>
       <div class="text-[11px] text-slate-400">Risk Cap: $${maxRiskUsd.toFixed(0)} (${riskPct}%)</div>
     </div>
     <div class="rounded border border-slate-800 bg-[#101726] p-2.5 mono">
-      <div class="text-[10px] text-slate-400">POSITION SIZE</div>
-      <div class="mt-0.5 text-sm font-bold text-sky-300">$${cappedNotional.toLocaleString(undefined,{maximumFractionDigits:0})}</div>
-      <div class="text-[11px] text-slate-400">≈ ${units} ${unitLbl}</div>
+      <div class="text-[10px] text-slate-400">POSITION SIZE (33% CAP)</div>
+      <div class="mt-0.5 text-sm font-bold text-sky-300">$${Math.round(cappedNotional).toLocaleString()}</div>
+      <div class="text-[11px] text-slate-400">≈ ${units} ${unitLbl} @ $${spotPrice.toFixed(2)}</div>
     </div>
     <div class="rounded border border-slate-800 bg-[#101726] p-2.5 mono">
-      <div class="text-[10px] text-slate-400">TARGET (+${targetPct.toFixed(1)}%)</div>
+      <div class="text-[10px] text-slate-400">2.8×ATR TARGET (+${targetPct.toFixed(1)}%)</div>
       <div class="mt-0.5 text-sm font-bold text-emerald-400">$${targetPrice.toFixed(2)}</div>
-      <div class="text-[11px] text-slate-400">Ref: $${spotPrice.toFixed(2)} · R:R ${rr}x</div>
+      <div class="text-[11px] text-slate-400">ATR(14): $${atr.toFixed(2)} · 1.87R</div>
     </div>
     <div class="rounded border border-slate-800 bg-[#101726] p-2.5 mono">
-      <div class="text-[10px] text-slate-400">STOP-LOSS (-${stopPct.toFixed(1)}%)</div>
+      <div class="text-[10px] text-slate-400">1.5×ATR STOP (-${stopPct.toFixed(1)}%)</div>
       <div class="mt-0.5 text-sm font-bold text-red-400">$${stopPrice.toFixed(2)}</div>
       <div class="text-[11px] text-slate-400">Hard Risk Invalidation</div>
     </div>
   `;
   document.getElementById("calc-rules-note").textContent =
-    `Sizing formula: Position = ($${maxRiskUsd.toFixed(0)} max risk) ÷ ${stopPct}% stop, capped at 100% account equity. Always verify real-time ETF/futures quotes and overnight gap risk with your broker before placing orders.`;
+    `Balanced Swing Desk sizing: Shares = ($${maxRiskUsd.toFixed(0)} risk ÷ $${stopDist.toFixed(2)} stop distance), capped at 33% account equity per slot (max 3 concurrent positions).`;
+}
+
+function renderWalkForwardPanel() {
+  const wf = DATA.walk_forward;
+  if (!wf || !wf.equity_curve || wf.equity_curve.length < 2) {
+    document.getElementById("wf-kpi-strip").innerHTML = `<div class="col-span-full text-xs mono text-slate-500 p-2">Loading 2-year walk-forward backtest…</div>`;
+    return;
+  }
+
+  document.getElementById("wf-window-badge").textContent = `${wf.start_date} → ${wf.end_date} (${wf.trading_days}d · ${wf.total_trades} TRADES)`;
+  document.getElementById("wf-tab-trades").textContent = `CLOSED TRADES (${(wf.recent_trades || []).length})`;
+
+  const kpis = [
+    ["STRATEGY RETURN", fmtSigned(wf.total_return_pct, 1, "%"), `$${Math.round(wf.ending_equity).toLocaleString()}`, wf.total_return_pct >= 0 ? "text-emerald-400" : "text-red-400"],
+    ["BNO BUY & HOLD", fmtSigned(wf.bno_benchmark_return_pct, 1, "%"), `Alpha ${fmtSigned(wf.alpha_vs_bno_pct,1,"%")}`, "text-sky-300"],
+    ["SHARPE RATIO", wf.sharpe_ratio.toFixed(2), "Annualized OOS", wf.sharpe_ratio >= 1 ? "text-emerald-400" : "text-slate-100"],
+    ["WIN RATE", `${wf.win_rate_pct.toFixed(1)}%`, `${wf.total_trades} closed trades`, wf.win_rate_pct >= 50 ? "text-emerald-300" : "text-amber-300"],
+    ["PROFIT FACTOR", `${wf.profit_factor.toFixed(2)}x`, `Exp ${fmtSigned(wf.expectancy_r,2,"R")}`, wf.profit_factor >= 1.2 ? "text-emerald-300" : "text-slate-200"],
+    ["MAX DRAWDOWN", `${wf.max_drawdown_pct.toFixed(1)}%`, "Peak-to-Trough", "text-red-400"],
+    ["AVG HOLD / SLIP", `${wf.avg_hold_days.toFixed(1)}d`, `${wf.slippage_bps_roundtrip} bps RT`, "text-slate-200"]
+  ];
+  document.getElementById("wf-kpi-strip").innerHTML = kpis.map(([lbl, val, sub, col]) => `
+    <div class="rounded border border-slate-800 bg-[#0B0F19] px-3 py-2 mono">
+      <div class="text-[10px] text-slate-400">${lbl}</div>
+      <div class="mt-0.5 text-base font-bold ${col}">${val}</div>
+      <div class="text-[10px] text-slate-500">${sub}</div>
+    </div>`).join("");
+
+  // Equity Curve SVG
+  const pts = wf.equity_curve;
+  const W = 700, H = 225, pL = 56, pR = 14, pT = 14, pB = 24;
+  const allVals = pts.flatMap(p => [p.strategy_equity, p.bno_equity]);
+  const lo = Math.min(...allVals) * 0.98, hi = Math.max(...allVals) * 1.02;
+  const xOf = i => pL + (i / (pts.length - 1)) * (W - pL - pR);
+  const yOf = v => pT + ((hi - v) / Math.max(hi - lo, 1)) * (H - pT - pB);
+  const pathOf = key => pts.map((p, i) => `${i === 0 ? "M" : "L"}${xOf(i).toFixed(1)},${yOf(p[key]).toFixed(1)}`).join(" ");
+
+  let svg = "";
+  for (let i = 0; i <= 4; i++) {
+    const v = lo + (i / 4) * (hi - lo), y = yOf(v);
+    svg += `<line x1="${pL}" y1="${y.toFixed(1)}" x2="${W - pR}" y2="${y.toFixed(1)}" stroke="#1E293B" stroke-dasharray="3 3"/>`;
+    svg += `<text x="${pL - 6}" y="${(y + 3).toFixed(1)}" text-anchor="end" fill="#64748B" font-size="10" font-family="monospace">$${Math.round(v / 1000)}k</text>`;
+  }
+  const stratPath = pathOf("strategy_equity");
+  svg += `<path d="${stratPath} L${xOf(pts.length-1).toFixed(1)},${(H-pB).toFixed(1)} L${pL},${(H-pB).toFixed(1)} Z" fill="#10B981" fill-opacity="0.10"/>`;
+  svg += `<path d="${pathOf("bno_equity")}" fill="none" stroke="#38BDF8" stroke-width="1.6" stroke-dasharray="4 3" stroke-opacity="0.8"/>`;
+  svg += `<path d="${stratPath}" fill="none" stroke="#10B981" stroke-width="2.2"/>`;
+  [0, Math.floor(pts.length * 0.33), Math.floor(pts.length * 0.66), pts.length - 1].forEach(i => {
+    svg += `<text x="${xOf(i).toFixed(1)}" y="${H - 6}" text-anchor="middle" fill="#94A3B8" font-size="10" font-family="monospace">${pts[i].date.slice(0, 7)}</text>`;
+  });
+  const stepW = (W - pL - pR) / pts.length;
+  pts.forEach((p, i) => {
+    svg += `<rect class="wf-hit" data-idx="${i}" x="${(pL + i * stepW).toFixed(1)}" y="${pT}" width="${Math.max(3, stepW).toFixed(1)}" height="${H - pT - pB}" fill="transparent"/>`;
+  });
+  const svgEl = document.getElementById("wf-equity-svg");
+  svgEl.innerHTML = svg;
+  svgEl.querySelectorAll(".wf-hit").forEach(r => {
+    r.onmouseenter = () => {
+      const p = pts[Number(r.dataset.idx)];
+      document.getElementById("wf-hover-readout").innerHTML =
+        `<span class="text-slate-200">${p.date}</span> · Strategy: <span class="text-emerald-300 font-semibold">$${p.strategy_equity.toLocaleString()}</span> · BNO Bench: <span class="text-sky-300">$${p.bno_equity.toLocaleString()}</span> · DD: <span class="text-red-400">${p.drawdown_pct.toFixed(1)}%</span>`;
+    };
+  });
+
+  renderWalkForwardTable();
+}
+
+function renderWalkForwardTable() {
+  const wf = DATA.walk_forward;
+  if (!wf) return;
+  const head = document.getElementById("wf-table-head");
+  const body = document.getElementById("wf-table-body");
+  if (wfTab === "tickers") {
+    head.innerHTML = `<tr><th class="py-2 px-3">Ticker</th><th class="py-2 px-3">Trades</th><th class="py-2 px-3">Win Rate</th><th class="py-2 px-3">PF</th><th class="py-2 px-3">Avg R</th><th class="py-2 px-3 text-right">Net P&amp;L</th></tr>`;
+    body.innerHTML = (wf.ticker_stats || []).map(t => `
+      <tr class="hover:bg-[#101726]/70 mono">
+        <td class="py-2.5 px-3"><div class="font-bold text-slate-100">${t.ticker}</div><div class="text-[10px] text-slate-500">${t.name}</div></td>
+        <td class="py-2.5 px-3 text-slate-300">${t.trades}</td>
+        <td class="py-2.5 px-3 ${t.win_rate_pct>=50?'text-emerald-400':'text-amber-300'}">${t.win_rate_pct.toFixed(1)}%</td>
+        <td class="py-2.5 px-3 text-slate-200">${t.profit_factor.toFixed(2)}x</td>
+        <td class="py-2.5 px-3 ${t.avg_r>=0?'text-emerald-400':'text-red-400'}">${fmtSigned(t.avg_r,2,"R")}</td>
+        <td class="py-2.5 px-3 text-right font-semibold ${t.net_pnl_usd>=0?'text-emerald-400':'text-red-400'}">${t.net_pnl_usd>=0?'+':''}$${t.net_pnl_usd.toLocaleString(undefined,{maximumFractionDigits:0})}</td>
+      </tr>`).join("");
+  } else {
+    head.innerHTML = `<tr><th class="py-2 px-2.5">Ticker</th><th class="py-2 px-2.5">Dates</th><th class="py-2 px-2.5">In / Out</th><th class="py-2 px-2.5">Reason</th><th class="py-2 px-2.5 text-right">P&amp;L</th></tr>`;
+    body.innerHTML = (wf.recent_trades || []).map(t => `
+      <tr class="hover:bg-[#101726]/70 mono text-[11px]">
+        <td class="py-2 px-2.5"><span class="font-bold text-slate-100">${t.ticker}</span> <span class="${t.side==='LONG'?'text-emerald-400':'text-red-400'}">${t.side}</span></td>
+        <td class="py-2 px-2.5 text-slate-400">${t.entry_date.slice(5)} → ${t.exit_date.slice(5)}</td>
+        <td class="py-2 px-2.5 text-slate-300">$${t.entry_price} → $${t.exit_price}</td>
+        <td class="py-2 px-2.5 text-slate-400">${t.exit_reason.replace("_"," ")}</td>
+        <td class="py-2 px-2.5 text-right font-semibold ${t.pnl_usd>=0?'text-emerald-400':'text-red-400'}">${t.pnl_usd>=0?'+':''}$${Math.round(t.pnl_usd).toLocaleString()} (${fmtSigned(t.pnl_pct,1,"%")})</td>
+      </tr>`).join("");
+  }
+}
+
+function updatePaperTabButtons() {
+  const active = "px-2.5 py-1 rounded bg-[#1B2840] text-slate-100 cursor-pointer";
+  const idle = "px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 cursor-pointer";
+  document.getElementById("pt-tab-open").className = paperTab === "open" ? active : idle;
+  document.getElementById("pt-tab-closed").className = paperTab === "closed" ? active : idle;
+  document.getElementById("pt-tab-manual").className = paperTab === "manual" ? active : idle;
+}
+
+function renderPaperLedger() {
+  const pl = DATA.paper_ledger;
+  const manual = loadManualTrades();
+  document.getElementById("pt-tab-open").textContent = `OPEN (${(pl?.open_positions || []).length} / 3)`;
+  document.getElementById("pt-tab-closed").textContent = `CLOSED (${(pl?.closed_trades || []).length})`;
+  document.getElementById("pt-tab-manual").textContent = `MY MANUAL JOURNAL (${manual.length})`;
+
+  if (pl) {
+    document.getElementById("paper-sync-badge").textContent = `LAST MARK: ${pl.updated_at}`;
+    const pkpis = [
+      ["PAPER EQUITY", `$${pl.equity.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`, `Start $${pl.starting_equity.toLocaleString()}`, "text-slate-100"],
+      ["TOTAL RETURN", fmtSigned(pl.total_return_pct, 2, "%"), `Cash $${Math.round(pl.cash).toLocaleString()}`, pl.total_return_pct >= 0 ? "text-emerald-400" : "text-red-400"],
+      ["UNREALIZED P&L", `${pl.unrealized_pnl_usd>=0?'+':''}$${pl.unrealized_pnl_usd.toFixed(2)}`, `${pl.open_positions.length} / 3 slots active`, pl.unrealized_pnl_usd >= 0 ? "text-emerald-400" : "text-red-400"],
+      ["REALIZED P&L", `${pl.realized_pnl_usd>=0?'+':''}$${pl.realized_pnl_usd.toFixed(2)}`, `${pl.closed_trades.length} closed trades`, pl.realized_pnl_usd >= 0 ? "text-emerald-400" : "text-red-400"],
+      ["CLOSED WIN RATE", `${pl.win_rate_pct.toFixed(1)}%`, "Forward OOS live", "text-sky-300"],
+      ["RISK RULES", "1.5% / TRADE", "1.5×ATR Stop · 5d Max", "text-amber-300"]
+    ];
+    document.getElementById("paper-kpi-strip").innerHTML = pkpis.map(([l, v, sub, col]) => `
+      <div class="rounded border border-slate-800 bg-[#0B0F19] px-3 py-2 mono">
+        <div class="text-[10px] text-slate-400">${l}</div>
+        <div class="mt-0.5 text-sm font-bold ${col}">${v}</div>
+        <div class="text-[10px] text-slate-500">${sub}</div>
+      </div>`).join("");
+  }
+
+  const head = document.getElementById("paper-table-head");
+  const body = document.getElementById("paper-table-body");
+
+  if (paperTab === "open") {
+    const rows = pl?.open_positions || [];
+    head.innerHTML = `<tr><th class="py-2 px-3">Ticker / Side</th><th class="py-2 px-3">Opened</th><th class="py-2 px-3">Entry → Live</th><th class="py-2 px-3">Shares / Notional</th><th class="py-2 px-3">Stop / Target</th><th class="py-2 px-3">Hold</th><th class="py-2 px-3 text-right">Unrealized P&amp;L</th></tr>`;
+    body.innerHTML = rows.length ? rows.map(p => `
+      <tr class="hover:bg-[#101726]/70 mono">
+        <td class="py-2.5 px-3"><span class="font-bold text-slate-100">${p.ticker}</span> <span class="px-1.5 py-0.5 rounded text-[10px] ${p.side==='LONG'?'bg-emerald-500/15 text-emerald-300':'bg-red-500/15 text-red-300'}">${p.side}</span></td>
+        <td class="py-2.5 px-3 text-slate-400 text-[11px]">${p.opened_at}</td>
+        <td class="py-2.5 px-3 text-slate-200">$${p.entry_price.toFixed(2)} → <span class="text-sky-300 font-semibold">$${p.current_price.toFixed(2)}</span></td>
+        <td class="py-2.5 px-3 text-slate-300">${p.shares} sh <span class="text-slate-500">($${Math.round(p.notional).toLocaleString()})</span></td>
+        <td class="py-2.5 px-3 text-[11px]"><span class="text-red-400">S $${p.stop_price.toFixed(2)}</span> · <span class="text-emerald-400">T $${p.target_price.toFixed(2)}</span></td>
+        <td class="py-2.5 px-3 text-slate-400">${p.hold_days}d / 5d</td>
+        <td class="py-2.5 px-3 text-right font-semibold ${p.unrealized_pnl_usd>=0?'text-emerald-400':'text-red-400'}">${p.unrealized_pnl_usd>=0?'+':''}$${p.unrealized_pnl_usd.toFixed(2)} (${fmtSigned(p.unrealized_pnl_pct,2,"%")})</td>
+      </tr>`).join("")
+      : `<tr><td colspan="7" class="py-6 text-center text-xs mono text-slate-500">No automated positions open yet — the desk enters automatically on the next high-conviction LONG/SHORT trigger (Conviction ≥ 56).</td></tr>`;
+  } else if (paperTab === "closed") {
+    const rows = pl?.closed_trades || [];
+    head.innerHTML = `<tr><th class="py-2 px-3">Ticker / Side</th><th class="py-2 px-3">Opened → Closed</th><th class="py-2 px-3">Entry → Exit</th><th class="py-2 px-3">Shares</th><th class="py-2 px-3">Exit Reason</th><th class="py-2 px-3 text-right">Realized P&amp;L</th></tr>`;
+    body.innerHTML = rows.length ? rows.map(c => `
+      <tr class="hover:bg-[#101726]/70 mono">
+        <td class="py-2.5 px-3"><span class="font-bold text-slate-100">${c.ticker}</span> <span class="${c.side==='LONG'?'text-emerald-400':'text-red-400'}">${c.side}</span></td>
+        <td class="py-2.5 px-3 text-slate-400 text-[11px]">${c.opened_at.slice(5,16)} → ${c.closed_at.slice(5,16)}</td>
+        <td class="py-2.5 px-3 text-slate-200">$${c.entry_price.toFixed(2)} → $${c.exit_price.toFixed(2)}</td>
+        <td class="py-2.5 px-3 text-slate-300">${c.shares}</td>
+        <td class="py-2.5 px-3 text-slate-400">${c.exit_reason.replace("_"," ")}</td>
+        <td class="py-2.5 px-3 text-right font-semibold ${c.pnl_usd>=0?'text-emerald-400':'text-red-400'}">${c.pnl_usd>=0?'+':''}$${c.pnl_usd.toFixed(2)} (${fmtSigned(c.pnl_pct,2,"%")})</td>
+      </tr>`).join("")
+      : `<tr><td colspan="6" class="py-6 text-center text-xs mono text-slate-500">No automated closed trades yet — closed trades accumulate transparently here over time.</td></tr>`;
+  } else {
+    const tMap = new Map(((DATA.walk_forward && DATA.walk_forward.live_tickets) || []).map(t => [t.ticker, t]));
+    head.innerHTML = `<tr><th class="py-2 px-3">Ticker / Side</th><th class="py-2 px-3">Logged</th><th class="py-2 px-3">Entry → Live/Exit</th><th class="py-2 px-3">Shares</th><th class="py-2 px-3">Stop / Target</th><th class="py-2 px-3">P&amp;L</th><th class="py-2 px-3 text-right">Action</th></tr>`;
+    body.innerHTML = manual.length ? manual.map(m => {
+      const refPx = m.status === "CLOSED" ? m.exit_price : (tMap.get(m.ticker)?.price ?? m.entry_price);
+      const pnl = m.side === "LONG" ? (refPx - m.entry_price) * m.shares : (m.entry_price - refPx) * m.shares;
+      const pct = ((m.side === "LONG" ? (refPx - m.entry_price) : (m.entry_price - refPx)) / Math.max(m.entry_price, 0.01)) * 100;
+      return `
+        <tr class="hover:bg-[#101726]/70 mono">
+          <td class="py-2.5 px-3"><span class="font-bold text-slate-100">${m.ticker}</span> <span class="${m.side==='LONG'?'text-emerald-400':'text-red-400'}">${m.side}</span></td>
+          <td class="py-2.5 px-3 text-slate-400 text-[11px]">${m.opened_at}</td>
+          <td class="py-2.5 px-3 text-slate-200">$${m.entry_price.toFixed(2)} → $${refPx.toFixed(2)}</td>
+          <td class="py-2.5 px-3 text-slate-300">${m.shares}</td>
+          <td class="py-2.5 px-3 text-[11px]"><span class="text-red-400">S $${m.stop_price.toFixed(2)}</span> · <span class="text-emerald-400">T $${m.target_price.toFixed(2)}</span></td>
+          <td class="py-2.5 px-3 font-semibold ${pnl>=0?'text-emerald-400':'text-red-400'}">${pnl>=0?'+':''}$${pnl.toFixed(2)} (${fmtSigned(pct,2,"%")})</td>
+          <td class="py-2.5 px-3 text-right">${m.status==='OPEN' ? `<button data-close-id="${m.id}" class="close-manual-btn px-2 py-0.5 rounded bg-red-500/15 text-red-300 border border-red-500/35 text-[10px] cursor-pointer">CLOSE</button>` : `<span class="text-slate-500 text-[10px]">CLOSED</span>`}</td>
+        </tr>`;
+    }).join("")
+      : `<tr><td colspan="7" class="py-6 text-center text-xs mono text-slate-500">Your manual browser journal is empty. Click "+ LOG PAPER" on any live ticket above to start tracking your own paper entries.</td></tr>`;
+    body.querySelectorAll(".close-manual-btn").forEach(btn => {
+      btn.onclick = () => closeManualPaperTrade(Number(btn.dataset.closeId));
+    });
+  }
 }
 
 // Event bindings
@@ -1404,6 +1785,23 @@ document.getElementById("toggle-speed").onclick = e => {
 document.getElementById("calc-instrument").onchange = e => { state.calcInstrument = e.target.value; renderRiskCalc(); };
 document.getElementById("calc-capital").oninput = e => { state.calcCapital = Number(e.target.value); renderRiskCalc(); };
 document.getElementById("calc-risk").oninput = e => { state.calcRiskPct = Number(e.target.value); renderRiskCalc(); };
+
+document.getElementById("wf-tab-tickers").onclick = () => {
+  wfTab = "tickers";
+  document.getElementById("wf-tab-tickers").className = "px-2.5 py-1 rounded bg-[#1B2840] text-slate-100 cursor-pointer";
+  document.getElementById("wf-tab-trades").className = "px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 cursor-pointer";
+  renderWalkForwardTable();
+};
+document.getElementById("wf-tab-trades").onclick = () => {
+  wfTab = "trades";
+  document.getElementById("wf-tab-trades").className = "px-2.5 py-1 rounded bg-[#1B2840] text-slate-100 cursor-pointer";
+  document.getElementById("wf-tab-tickers").className = "px-2.5 py-1 rounded text-slate-400 hover:text-slate-200 cursor-pointer";
+  renderWalkForwardTable();
+};
+
+document.getElementById("pt-tab-open").onclick = () => { paperTab = "open"; updatePaperTabButtons(); renderPaperLedger(); };
+document.getElementById("pt-tab-closed").onclick = () => { paperTab = "closed"; updatePaperTabButtons(); renderPaperLedger(); };
+document.getElementById("pt-tab-manual").onclick = () => { paperTab = "manual"; updatePaperTabButtons(); renderPaperLedger(); };
 
 document.querySelectorAll(".sig-tab").forEach(btn => {
   btn.onclick = () => {
@@ -1448,7 +1846,7 @@ function renderProvenance() {
     return `<span class="px-2 py-0.5 rounded border ${cls}">${label}: ${String(src).toUpperCase().replace("_", " ")}</span>`;
   };
   document.getElementById("provenance-badges").innerHTML =
-    pill("OIL", m.oil_source) +
+    pill("OIL/ETFs", m.oil_source) +
     pill("TRANSITS", m.transit_source) +
     pill("AIS", m.vessel_source) +
     `<span class="px-2 py-0.5 rounded bg-slate-800/90 text-slate-400 border border-slate-700/80">SYNC: ${m.updated_at}</span>`;
@@ -1464,6 +1862,8 @@ function renderAll() {
   renderSignals();
   renderDualChart();
   renderTradingPlaybook();
+  renderWalkForwardPanel();
+  renderPaperLedger();
   renderStressTest();
   renderAnomalyLog();
 }
