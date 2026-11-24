@@ -1,6 +1,6 @@
 {
   "created_at": "2026-11-22 20:33 UTC",
-  "updated_at": "2026-11-23 08:37 UTC",
+  "updated_at": "2026-11-24 00:33 UTC",
   "profile": "Balanced Swing Desk ($100k \u00b7 1.5% risk \u00b7 max 3 positions \u00b7 ATR stops)",
   "starting_equity": 100000.0,
   "cash": 100000.0,
@@ -20,9 +20,22 @@
     {
       "timestamp": "2026-11-23 08:37 UTC",
       "equity": 100000.0
+    },
+    {
+      "timestamp": "2026-11-24 00:33 UTC",
+      "equity": 100000.0
     }
   ],
   "alerts": [
+    {
+      "id": "QUEUE_SURGE-SYS-202611240033",
+      "timestamp": "2026-11-24 00:33 UTC",
+      "kind": "QUEUE_SURGE",
+      "severity": "HIGH",
+      "ticker": null,
+      "title": "Hormuz Queue Surge (624 Ships Waiting)",
+      "message": "Elevated vessel queuing off Gulf of Oman & Persian Gulf approaches \u2014 bullish freight & Brent risk."
+    },
     {
       "id": "QUEUE_SURGE-SYS-202611230837",
       "timestamp": "2026-11-23 08:37 UTC",
