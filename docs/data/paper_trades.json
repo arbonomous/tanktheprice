@@ -1,13 +1,13 @@
 {
   "created_at": "2026-11-22 20:33 UTC",
-  "updated_at": "2026-11-24 10:41 UTC",
+  "updated_at": "2026-11-24 22:53 UTC",
   "profile": "Balanced Swing Desk ($100k \u00b7 1.5% risk \u00b7 max 3 positions \u00b7 ATR stops)",
   "starting_equity": 100000.0,
   "cash": 80021.4,
-  "equity": 99990.45,
+  "equity": 100382.0,
   "realized_pnl_usd": 0.0,
-  "unrealized_pnl_usd": -9.55,
-  "total_return_pct": -0.01,
+  "unrealized_pnl_usd": 382.0,
+  "total_return_pct": 0.38,
   "win_rate_pct": 0.0,
   "last_regime": "BULLISH",
   "open_positions": [
@@ -17,7 +17,7 @@
       "side": "LONG",
       "opened_at": "2026-11-24 10:41 UTC",
       "entry_price": 20.92,
-      "current_price": 20.91,
+      "current_price": 21.32,
       "stop_price": 19.35,
       "target_price": 23.82,
       "shares": 955,
@@ -25,8 +25,8 @@
       "risk_usd": 1499.35,
       "conviction": 73.3,
       "rationale": "Hormuz shock +30.2 + congestion surge favoring tanker dayrates",
-      "unrealized_pnl_usd": -9.55,
-      "unrealized_pnl_pct": -0.05,
+      "unrealized_pnl_usd": 382.0,
+      "unrealized_pnl_pct": 1.91,
       "hold_days": 0
     }
   ],
@@ -47,9 +47,22 @@
     {
       "timestamp": "2026-11-24 10:41 UTC",
       "equity": 99990.45
+    },
+    {
+      "timestamp": "2026-11-24 22:53 UTC",
+      "equity": 100382.0
     }
   ],
   "alerts": [
+    {
+      "id": "QUEUE_SURGE-SYS-202611242253",
+      "timestamp": "2026-11-24 22:53 UTC",
+      "kind": "QUEUE_SURGE",
+      "severity": "HIGH",
+      "ticker": null,
+      "title": "Hormuz Queue Surge (630 Ships Waiting)",
+      "message": "Elevated vessel queuing off Gulf of Oman & Persian Gulf approaches \u2014 bullish freight & Brent risk."
+    },
     {
       "id": "QUEUE_SURGE-SYS-202611241041",
       "timestamp": "2026-11-24 10:41 UTC",
