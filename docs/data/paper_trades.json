@@ -1,13 +1,13 @@
 {
   "created_at": "2026-11-22 20:33 UTC",
-  "updated_at": "2026-11-25 09:35 UTC",
+  "updated_at": "2026-11-25 22:06 UTC",
   "profile": "Balanced Swing Desk ($100k \u00b7 1.5% risk \u00b7 max 3 positions \u00b7 ATR stops)",
   "starting_equity": 100000.0,
-  "cash": 80021.4,
-  "equity": 100382.0,
+  "cash": 53183.19,
+  "equity": 100733.64,
   "realized_pnl_usd": 0.0,
-  "unrealized_pnl_usd": 382.0,
-  "total_return_pct": 0.38,
+  "unrealized_pnl_usd": 733.64,
+  "total_return_pct": 0.73,
   "win_rate_pct": 0.0,
   "last_regime": "BULLISH",
   "open_positions": [
@@ -17,7 +17,7 @@
       "side": "LONG",
       "opened_at": "2026-11-24 10:41 UTC",
       "entry_price": 20.92,
-      "current_price": 21.32,
+      "current_price": 21.7,
       "stop_price": 19.35,
       "target_price": 23.82,
       "shares": 955,
@@ -25,9 +25,27 @@
       "risk_usd": 1499.35,
       "conviction": 73.3,
       "rationale": "Hormuz shock +30.2 + congestion surge favoring tanker dayrates",
-      "unrealized_pnl_usd": 382.0,
-      "unrealized_pnl_pct": 1.91,
+      "unrealized_pnl_usd": 744.9,
+      "unrealized_pnl_pct": 3.73,
       "hold_days": 1
+    },
+    {
+      "ticker": "FRO",
+      "name": "Frontline plc",
+      "side": "LONG",
+      "opened_at": "2026-11-25 22:06 UTC",
+      "entry_price": 47.67,
+      "current_price": 47.65,
+      "stop_price": 44.99,
+      "target_price": 52.62,
+      "shares": 563,
+      "notional": 26838.21,
+      "risk_usd": 1508.84,
+      "conviction": 69.6,
+      "rationale": "Hormuz shock +29.5 + congestion surge favoring tanker dayrates",
+      "unrealized_pnl_usd": -11.26,
+      "unrealized_pnl_pct": -0.04,
+      "hold_days": 0
     }
   ],
   "closed_trades": [],
@@ -55,9 +73,31 @@
     {
       "timestamp": "2026-11-25 09:35 UTC",
       "equity": 100382.0
+    },
+    {
+      "timestamp": "2026-11-25 22:06 UTC",
+      "equity": 100733.64
     }
   ],
   "alerts": [
+    {
+      "id": "QUEUE_SURGE-SYS-202611252206",
+      "timestamp": "2026-11-25 22:06 UTC",
+      "kind": "QUEUE_SURGE",
+      "severity": "HIGH",
+      "ticker": null,
+      "title": "Hormuz Queue Surge (589 Ships Waiting)",
+      "message": "Elevated vessel queuing off Gulf of Oman & Persian Gulf approaches \u2014 bullish freight & Brent risk."
+    },
+    {
+      "id": "OPEN-FRO-202611252206",
+      "timestamp": "2026-11-25 22:06 UTC",
+      "kind": "OPEN",
+      "severity": "HIGH",
+      "ticker": "FRO",
+      "title": "Opened Paper LONG FRO (70/100)",
+      "message": "Entry $47.67 \u00d7 563 sh ($26,838) | Target $52.62 | Stop $44.99."
+    },
     {
       "id": "QUEUE_SURGE-SYS-202611250935",
       "timestamp": "2026-11-25 09:35 UTC",
