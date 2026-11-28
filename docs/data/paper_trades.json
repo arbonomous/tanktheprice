@@ -1,6 +1,6 @@
 {
   "created_at": "2026-11-22 20:33 UTC",
-  "updated_at": "2026-11-27 21:47 UTC",
+  "updated_at": "2026-11-28 07:15 UTC",
   "profile": "Balanced Swing Desk ($100k \u00b7 1.5% risk \u00b7 max 3 positions \u00b7 ATR stops)",
   "starting_equity": 100000.0,
   "cash": 53183.19,
@@ -9,7 +9,7 @@
   "unrealized_pnl_usd": 863.42,
   "total_return_pct": 0.86,
   "win_rate_pct": 0.0,
-  "last_regime": "BEARISH",
+  "last_regime": "BULLISH",
   "open_positions": [
     {
       "ticker": "DHT",
@@ -93,9 +93,31 @@
     {
       "timestamp": "2026-11-27 21:47 UTC",
       "equity": 100863.42
+    },
+    {
+      "timestamp": "2026-11-28 07:15 UTC",
+      "equity": 100863.42
     }
   ],
   "alerts": [
+    {
+      "id": "REGIME_FLIP-SYS-202611280715",
+      "timestamp": "2026-11-28 07:15 UTC",
+      "kind": "REGIME_FLIP",
+      "severity": "HIGH",
+      "ticker": null,
+      "title": "Hormuz Regime Flipped -> BULLISH",
+      "message": "Composite Supply Shock moved to +35.4 (prior regime: BEARISH)."
+    },
+    {
+      "id": "QUEUE_SURGE-SYS-202611280715",
+      "timestamp": "2026-11-28 07:15 UTC",
+      "kind": "QUEUE_SURGE",
+      "severity": "HIGH",
+      "ticker": null,
+      "title": "Hormuz Queue Surge (608 Ships Waiting)",
+      "message": "Elevated vessel queuing off Gulf of Oman & Persian Gulf approaches \u2014 bullish freight & Brent risk."
+    },
     {
       "id": "REGIME_FLIP-SYS-202611272147",
       "timestamp": "2026-11-27 21:47 UTC",
